@@ -52,16 +52,21 @@ public class Client {
 	            BufferedWriter bw = new BufferedWriter(osw);
 	            
 	            JSONObject json = new JSONObject();
-	            int i = 2*json.toString().toCharArray().length;
+	            int k = 2*json.toString().toCharArray().length;
 	            json.put("register","ed25519");
 	            
-	            char [] strs = {'\000','\000','\000','\000','\000','\000','\000','\023'};
+	            char [] strs = {'\000','\000','\000','\000','\000','\000','\000','\004'};
 	 
-	 
-//	            String sendMessage = number + "\n";
-	            bw.write(strs+json.toString());
+	            String mes = "";
+	            for(int i=0;i<strs.length;i++) {
+	            	mes += strs[i];
+	            }
+	            mes +=json.toString();
+	            bw.write(mes);
+	            
+	            
 	            bw.flush();
-	            System.out.println("Message sent to the server : "+strs+json.toString());
+	            System.out.println("Message sent to the server : "+json.toString());
 	            
 //	            JSONObject getlettres = new JSONObject();
 //	            json.put("get_full_letterpool",null);

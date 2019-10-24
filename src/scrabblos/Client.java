@@ -43,10 +43,10 @@ public class Client {
 	public static void main(String args[]) {
 		try {
 			String host = "localhost";
-			int port = 12346;
+			int port = 12345;
 			InetAddress address = InetAddress.getByName(host);
 			// System.err.print(address);
-			socket = new Socket(address, port, true);
+			socket = new Socket(address, port);
 
 			// Send the message to the server
 			OutputStream os = socket.getOutputStream();
@@ -57,22 +57,25 @@ public class Client {
 			int k = 2 * json.toString().toCharArray().length;
 			json.put("register", "b7b597e0d64accdb6d8271328c75ad301c29829619f4865d31cc0c550046a08f");
 			byte [] a =intToBigEndian(json.toString().length());
+			String prex = "";
 			String mes = "";
 			
 			for(int i = a.length-1 ;i>=0 ;i--) {
-				mes +=Integer.toString(a[i],8);
+				//mes +=Integer.toString(a[i],8);
+				prex += convertToOctat(a[i]);
 			}
+//			
 			
-			//mes = "\000\000\000\000\000\000\000\117"+json.toString();
-			mes += json.toString();
+//			prex = "\000\000\000\000\000\000\000\117";
+//			System.out.println("prex:  " + prex);
+			mes =prex + json.toString();
+	     	mes += json.toString();
+//			mes = prex + json.toString();
 			bw.write(mes);
-			//System.out.println("size" + json.toString().toCharArray().length);
 
 			bw.flush();
 			System.out.println("Message sent to the server : " + mes);
 
-//	            JSONObject getlettres = new JSONObject();
-//	            json.put("get_full_letterpool",null);
 
 			// Get the return message from the server
 			System.out.println("port : " + socket.getReceiveBufferSize());
@@ -87,8 +90,6 @@ public class Client {
 			message = br.readLine();
 			System.out.println("Message received from the server : ");
 			
-			//br.close();
-
 			System.out.println("leave" + message);
 		} catch (IOException exception) {
 			exception.printStackTrace();
@@ -107,9 +108,15 @@ public class Client {
 		}
 	}
 	
-	public static String byteToHex(byte b) {
-	    int i = b & 0xFF;
-	    return Integer.toHexString(i);
+	public static String convertToOctat(byte b) {
+	    int i = b;
+	    String str = Integer.toOctalString(i);
+	    while(str.length()<3) {
+	    	str = "0"+str;
+	    }
+	    str = "\\" + str;
+	    return str;
+	    //return Integer.toHexString(i);
 	  }
 	
 	private static byte[] intToBigEndian(int numero) {
@@ -121,4 +128,14 @@ public class Client {
 		return bb.array();
 		
 	}
+//	private static String convertToOctat(byte[] bb) {
+//		String str = "";
+//		for(int i =bb.length-1;i>=0;i--) {
+//			str ="\"+;
+//		}
+//		
+//		
+//		return str;
+//	}
+	
 }

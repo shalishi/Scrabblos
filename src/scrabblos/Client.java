@@ -27,7 +27,6 @@ import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
 public class Client {
 
 	private static Socket socket;
-
 	private String getPublicKey() {
 		try {
 			Signature sgr = new EdDSAEngine(MessageDigest.getInstance("SHA-512"));
@@ -57,26 +56,11 @@ public class Client {
 			int k = 2 * json.toString().toCharArray().length;
 			json.put("register", "b7b597e0d64accdb6d8271328c75ad301c29829619f4865d31cc0c550046a08f");
 			byte [] a =intToBigEndian(json.toString().length());
-			String prex = "";
-			String mes = "";
-			
 			for(int i = a.length-1 ;i>=0 ;i--) {
-				//mes +=Integer.toString(a[i],8);
-				prex += convertToOctat(a[i]);
+				bw.write((char)(a[i]));
 			}
-//			
-			
-//			prex = "\000\000\000\000\000\000\000\117";
-//			System.out.println("prex:  " + prex);
-			mes =prex + json.toString();
-	     	mes += json.toString();
-//			mes = prex + json.toString();
-			bw.write(mes);
-
+			bw.write(json.toString());
 			bw.flush();
-			System.out.println("Message sent to the server : " + mes);
-
-
 			// Get the return message from the server
 			System.out.println("port : " + socket.getReceiveBufferSize());
 
@@ -84,7 +68,6 @@ public class Client {
 			InputStreamReader isr = new InputStreamReader(is);
 			BufferedReader br = new BufferedReader(isr);
 			String message = "";
-			
 
 			System.out.println("here : ");
 			message = br.readLine();
@@ -107,18 +90,7 @@ public class Client {
 			}
 		}
 	}
-	
-	public static String convertToOctat(byte b) {
-	    int i = b;
-	    String str = Integer.toOctalString(i);
-	    while(str.length()<3) {
-	    	str = "0"+str;
-	    }
-	    str = "\\" + str;
-	    return str;
-	    //return Integer.toHexString(i);
-	  }
-	
+
 	private static byte[] intToBigEndian(int numero) {
 		ByteBuffer bb = ByteBuffer.allocate(8);
 		bb.rewind();
@@ -128,14 +100,6 @@ public class Client {
 		return bb.array();
 		
 	}
-//	private static String convertToOctat(byte[] bb) {
-//		String str = "";
-//		for(int i =bb.length-1;i>=0;i--) {
-//			str ="\"+;
-//		}
-//		
-//		
-//		return str;
-//	}
+
 	
 }

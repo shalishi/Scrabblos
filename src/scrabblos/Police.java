@@ -5,7 +5,7 @@ import java.util.ArrayList;
 public class Police {
 	
 	public static ArrayList<String> dictionnary;
-	private ArrayList<LettreDisp> word_current="";
+	private ArrayList<LettreDisp> word_current;
 	
 	private boolean filterLetter(LettreDisp letter_disp) {
 		for(LettreDisp letter : word_current) {

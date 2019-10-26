@@ -9,6 +9,7 @@ import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
+import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -26,9 +27,9 @@ import net.i2p.crypto.eddsa.spec.EdDSANamedCurveTable;
 import net.i2p.crypto.eddsa.spec.EdDSAParameterSpec;
 import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
 
-public class Client {
+public class Politicien {
 
-	private static Socket socket;
+	private static ServerSocket socket;
 	private String getPublicKey() {
 		try {
 			Signature sgr = new EdDSAEngine(MessageDigest.getInstance("SHA-512"));
@@ -40,42 +41,6 @@ public class Client {
 
 		return "";
 	}
-	public static void register(BufferedWriter bw) throws IOException, JSONException {
-		JSONObject json = new JSONObject();
-		json.put("register", "b7b597e0d64accdb6d8271328c75ad301c29829619f4865d31cc0c550046a08f");
-
-		byte [] a =intToBigEndian(json.toString().length());
-		for(int i = a.length-1 ;i>=0 ;i--) {
-			bw.write((char)(a[i]));
-		}
-		bw.write(json.toString());
-		bw.flush();
-
-	}
-	public static void continous_listen(BufferedWriter bw) throws JSONException, IOException {
-		byte [] a =intToBigEndian("{ \"listen\" : null }".length());
-		for(int i = a.length-1 ;i>=0 ;i--) {
-			bw.write((char)(a[i]));
-		}
-		System.out.println("{ \"listen\" : null }");
-		bw.write("{ \"listen\" : null }");
-		bw.flush();
-	}
-	
-	public static void stop_listen(BufferedWriter bw) throws JSONException, IOException {
-		byte [] a =intToBigEndian("{ \"stop_listen\" : null }".length());
-		for(int i = a.length-1 ;i>=0 ;i--) {
-			bw.write((char)(a[i]));
-		}
-		System.out.println("{ \"stop_listen\" : null }");
-		bw.write("{ \"stop_listen\" : null }");
-		bw.flush();
-	}
-	
-	public static void inject_Letter(BufferedWriter bw) {
-		
-	}
-	
 
 	public static void main(String args[]) {
 		try {
@@ -83,25 +48,13 @@ public class Client {
 			int port = 12345;
 			InetAddress address = InetAddress.getByName(host);
 			// System.err.print(address);
-			socket = new Socket(address, port);
-
-			// Send the message to the server
-			OutputStream os = socket.getOutputStream();
-			OutputStreamWriter osw = new OutputStreamWriter(os);
-			BufferedWriter bw = new BufferedWriter(osw);
-			
-			register(bw);
-			//continous_listen(bw);
-			//stop_listen(bw);
-			
-			
-			//socket.close();
-			
+			socket = new ServerSocket(port);
+			 
 			//InputStream is = socket.getInputStream();
-			InputStreamReader isr = new InputStreamReader(System.in);
-			BufferedReader br = new BufferedReader(isr);
-			String message = br.readLine();
-			System.out.println("Message received from the server : " + message );
+			//InputStreamReader isr = new InputStreamReader(socket.getInputStream());
+			//BufferedReader br = new BufferedReader(isr);
+			//String message = br.readLine();
+			//System.out.println("Message received from client : " + message );
 			
 			//System.out.println("leave" + message);
 		} catch (IOException exception) {
@@ -133,3 +86,4 @@ public class Client {
 
 	
 }
+

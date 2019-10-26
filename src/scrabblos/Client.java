@@ -91,18 +91,36 @@ public class Client {
 			BufferedWriter bw = new BufferedWriter(osw);
 			
 			register(bw);
+			
 			//continous_listen(bw);
 			//stop_listen(bw);
 			
 			
 			//socket.close();
 			
-			//InputStream is = socket.getInputStream();
-			InputStreamReader isr = new InputStreamReader(System.in);
+			InputStream is = socket.getInputStream();
+			InputStreamReader isr = new InputStreamReader(is);
 			BufferedReader br = new BufferedReader(isr);
-			String message = br.readLine();
+			/*while(true) {
+			int message = br.read();
 			System.out.println("Message received from the server : " + message );
-			
+			}
+			*/
+			int c;
+			StringBuilder response= new StringBuilder();
+
+			while (br.ready()) {
+				c = br.read();
+			    // Since c is an integer, cast it to a char.
+			    // If c isn't -1, it will be in the correct range of char.
+				if(c>=34 && c<=127) {
+			    response.append((char)c );
+			    System.out.println("char : " + (char)c);
+				}
+				 System.out.println("Message received from the server : " + c  );
+			}
+			String result = response.toString();
+			System.out.println("Message : " + result );
 			//System.out.println("leave" + message);
 		} catch (IOException exception) {
 			exception.printStackTrace();
@@ -121,12 +139,13 @@ public class Client {
 		}
 	}
 
+	
 	private static byte[] intToBigEndian(int numero) {
 		ByteBuffer bb = ByteBuffer.allocate(8);
 		bb.rewind();
 		bb.order(ByteOrder.LITTLE_ENDIAN);
 		bb.putInt((int) numero);
-		System.out.println(bb);
+		//System.out.println(bb);
 		return bb.array();
 		
 	}

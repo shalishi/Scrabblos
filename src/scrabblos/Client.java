@@ -118,28 +118,30 @@ public class Client {
 	
 	public static void inject_Letter(Socket s, ArrayList<Character> LetterBag,BufferedWriter bw) throws IOException, JSONException {
 		Collections.shuffle(LetterBag);
-	    Character letter = LetterBag.get(0);
+	    //Character letter = LetterBag.get(0);
 		JSONObject json = new JSONObject();
-		json.put("letter", letter);
-		json.put("signature","8b6547447108e11c0092c95e460d70f367bc137d5f89c626642e1e5f2ce");
+		json.put("letter", "a");
+		json.put("signature","8b6547447108e11c0092c95e460d70f367bc137d5f89c626642e1e5f2ceb6108043d4a080223b467bb810c52b5975960eea96a2203a877f32bbd6c4dac16ec07");
 		json.put("author", "b7b597e0d64accdb6d8271328c75ad301c29829619f4865d31cc0c550046a08f");
 		json.put("head","e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
 		json.put("period", 0);
-		json.put("letter", letter);
+		//json.put("letter", letter);
 		String j = "{ \"inject_letter\": { \"letter\":\"a\", \"period\":0, \"head\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"author\":\"b7b597e0d64accdb6d8271328c75ad301c29829619f4865d31cc0c550046a08f\", \"signature\":\"8b6547447108e11c0092c95e460d70f367bc137d5f89c626642e1e5f2ce\" }}";
 		JSONObject json2 = new JSONObject();
 		json2.put("inject_letter", json);
-		
-		byte [] a =intToBigEndian(j.length());
+		System.out.println("taille" + json2.toString().length());
+		byte [] a =intToBigEndian(json2.toString().length());
+		System.out.println(a);
 
 		//byte [] a =intToBigEndian(json2.toString().length());
 		//byte [] a =intToBigEndian(("{ \"Inject_letter\" : "+  letter+ " }").length());
 		for(int i = a.length-1 ;i>=0 ;i--) {
+			System.out.println((char)(a[i]));
 			bw.write((char)(a[i]));
 		}
 		//System.out.println("{ \"Inject_letter\" : " + letter + " }");
 		System.out.println(j);
-		bw.write(j.toString());
+		bw.write(json2.toString());
 		//bw.write("{ \"Inject_letter\" : " +  letter +" }");
 		bw.flush();
 	}
@@ -166,8 +168,10 @@ public class Client {
 		JSONObject json = new JSONObject();
 		json.put("inject_word", word);
 		byte [] a =intToBigEndian(json.toString().length());
+		System.out.println(a);
 		//byte [] a =intToBigEndian(("{ \"Inject_letter\" : "+  letter+ " }").length());
 		for(int i = a.length-1 ;i>=0 ;i--) {
+			System.out.println("what" + (char)(a[i]));
 			bw.write((char)(a[i]));
 		}
 		//System.out.println("{ \"Inject_letter\" : " + letter + " }");

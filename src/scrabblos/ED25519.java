@@ -32,7 +32,7 @@ public class ED25519 {
 		return gen.generateKeyPair();
 	}
 	public static byte[] sign (KeyPair k, byte[] msg) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
-		Signature sig = Signature.getInstance("ED_2559");
+		Signature sig = Signature.getInstance("ED_25519");
 		sig.initSign(k.getPrivate());
 		sig.update(msg);
 		byte[] s = sig.sign();

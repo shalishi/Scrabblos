@@ -39,6 +39,7 @@ public class ED25519 {
 		return s;
 	}
 	
+	
 	public static boolean verify(KeyPair k,byte [] msg, byte [] sig) throws InvalidKeyException, NoSuchAlgorithmException, SignatureException {
 		EdDSAParameterSpec spec = EdDSANamedCurveTable.getByName(EdDSANamedCurveTable.ED_25519);
 		Signature sig2 = new EdDSAEngine(MessageDigest.getInstance(spec.getHashAlgorithm()));

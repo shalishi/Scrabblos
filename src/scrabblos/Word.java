@@ -4,14 +4,14 @@ import java.util.ArrayList;
 
 public class Word {
 	private ArrayList<Letter> word;
-	private String hash;
+	private String head;
 	private String politicien;
 	private String signature;
 	
 	public Word(ArrayList<Letter> word, String hash, String politicien, String signature) {
 		super();
 		this.word = word;
-		this.hash = hash;
+		this.head = hash;
 		this.politicien = politicien;
 		this.signature = signature;
 	}
@@ -23,10 +23,10 @@ public class Word {
 		this.word = word;
 	}
 	public String getHash() {
-		return hash;
+		return head;
 	}
 	public void setHash(String hash) {
-		this.hash = hash;
+		this.head = hash;
 	}
 	public String getPoliticien() {
 		return politicien;

@@ -14,12 +14,16 @@ import java.nio.ByteOrder;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.Signature;
+import java.util.ArrayList;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 import net.i2p.crypto.eddsa.EdDSAEngine;
 import net.i2p.crypto.eddsa.spec.EdDSANamedCurveTable;
@@ -94,7 +98,6 @@ public class Politicien {
 	
 	public static void get_full_letterpool(Socket socket,BufferedWriter bw) throws JSONException, IOException {
 		
-		
 		byte [] a =intToBigEndian("{ \"get_full_letterpool\": null}".length());
 		for(int i = a.length-1 ;i>=0 ;i--) {
 			bw.write((char)(a[i]));
@@ -104,9 +107,9 @@ public class Politicien {
 		bw.flush();
 	}
 	
-	public static void get_letterpool_since(Socket socket,BufferedWriter bw,int period) throws JSONException, IOException {
+	public static ArrayList<Letter> get_letterpool_since(Socket socket,BufferedWriter bw,int period) throws JSONException, IOException {
 		
-		
+		//ENVOIE DE LA REQUETE
 		byte [] a =intToBigEndian(("{ \"get_letterpool_since\":" + period + "}").length());
 		for(int i = a.length-1 ;i>=0 ;i--) {
 			bw.write((char)(a[i]));
@@ -114,6 +117,9 @@ public class Politicien {
 		System.out.println("{ \"listen\" : null }");
 		bw.write("{ \"get_letterpool_since\":" + period + "}");
 		bw.flush();
+		
+		
+		//RECUPERATION DE LA REPONSE SOUS FORME DE STRING
 		int c;
 		InputStream is = socket.getInputStream();
 		InputStreamReader isr = new InputStreamReader(is);
@@ -129,20 +135,28 @@ public class Politicien {
 					System.out.println("char : " + (char)c);
 				}
 			}
-			
 			if((char)c =='^') {
 				debutRep = true;
 			}
-			
 			 //System.out.println("Message received from the server : " + (char)c  );
 		}
+		//TRANSFORMATION DE LA REPONSE SOUS FORME DE LISTE DE LETTER
 		System.out.println("je suis res" + res);
-		
 		Gson gson = new Gson();
-		//{"current_period":0,"next_period":1,"letters":[]}
-		DiffLetterPool difletterPool = gson.fromJson(res, DiffLetterPool.class);
-		scrabblos.DiffLetterPool.LetterPool letterpool = difletterPool.getLetterpool();
-		System.out.println(letterpool.getCurrent_period());
+		JSONObject j = new JSONObject(res);
+		System.out.println(j.toString());
+		JSONObject j2 = (JSONObject) j.get("diff_letterpool");
+		System.out.println(j2);
+		JSONObject letterpool = (JSONObject) j2.get("letterpool");
+		System.out.println(letterpool);
+		JSONArray letters = letterpool.getJSONArray("letters");
+		System.out.println(letters.toString());
+		ArrayList<Letter> lettersA = new ArrayList<Letter>();
+		for (int i = 0; i < letters.length(); i++) {
+			lettersA.add(gson.fromJson(letters.getJSONObject(i).toString(), Letter.class));
+		}
+		
+		return lettersA;
 	}
 
 
@@ -167,6 +181,8 @@ public class Politicien {
 		System.out.println("{ \"listen\" : null }");
 		bw.write("{ \"get_wordpool_since\":" + period + "}");
 		bw.flush();
+		
+		
 	}
 	
 	public static void make_word(DiffLetterPool dffl) {

@@ -1,5 +1,7 @@
 package scrabblos;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.ArrayList;
 
 public class Word {
@@ -7,6 +9,25 @@ public class Word {
 	private String head;
 	private String politicien;
 	private String signature;
+	
+	
+	public static ArrayList<String> makeDictionnary(String fileName) {
+		  try {
+	            String line = null;
+	            FileReader fileReader = new FileReader(fileName);
+	            BufferedReader bufferedReader = new BufferedReader(fileReader);
+	            ArrayList<String> strings = new ArrayList<String>();
+
+	            while ((line = bufferedReader.readLine()) != null) {
+	                strings.add(line);
+	            }
+	            return strings;
+
+	        } catch (Exception e) {
+	        	return null;
+	        }
+	}
+	
 	
 	public Word(ArrayList<Letter> word, String hash, String politicien, String signature) {
 		super();

@@ -2,6 +2,7 @@ package scrabblos;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -30,20 +31,24 @@ import net.i2p.crypto.eddsa.spec.EdDSANamedCurveTable;
 import net.i2p.crypto.eddsa.spec.EdDSAParameterSpec;
 
 public class Politicien {
-
+	
 	private static Socket socket;
-	private static String generatePublicKey() {
-		try {
-			Signature sgr = new EdDSAEngine(MessageDigest.getInstance("SHA-512"));
-			
-			System.out.println(sgr);
-		} catch (NoSuchAlgorithmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		EdDSAParameterSpec spec = EdDSANamedCurveTable.getByName("ed25519-sha-512");
+	
+	public static ArrayList<String> makeDictionnary(String fileName) {
+		  try {
+	            String line = null;
+	            FileReader fileReader = new FileReader(fileName);
+	            BufferedReader bufferedReader = new BufferedReader(fileReader);
+	            ArrayList<String> strings = new ArrayList<String>();
 
-		return "";
+	            while ((line = bufferedReader.readLine()) != null) {
+	                strings.add(line);
+	            }
+	            return strings;
+
+	        } catch (Exception e) {
+	        	return null;
+	        }
 	}
 	
 	public static void register(Socket socket) throws IOException, JSONException {
@@ -169,6 +174,7 @@ public class Politicien {
 		System.out.println("{ \"listen\" : null }");
 		bw.write("{ \"get_full_wordpool\": null}");
 		bw.flush();
+		
 	}
 	
 	public static void get_wordpool_since(Socket socket,BufferedWriter bw,int period) throws JSONException, IOException {
@@ -181,7 +187,7 @@ public class Politicien {
 		System.out.println("{ \"listen\" : null }");
 		bw.write("{ \"get_wordpool_since\":" + period + "}");
 		bw.flush();
-		
+
 		
 	}
 	

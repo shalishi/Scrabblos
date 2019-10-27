@@ -5,29 +5,25 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.Signature;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.security.PublicKey;
-import java.security.Signature;
-import java.util.ArrayList;
-import java.util.Collections;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import net.i2p.crypto.eddsa.EdDSAEngine;
 import net.i2p.crypto.eddsa.spec.EdDSANamedCurveTable;
 import net.i2p.crypto.eddsa.spec.EdDSAParameterSpec;
-import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
 
 public class Politicien {
 
@@ -45,6 +41,7 @@ public class Politicien {
 
 		return "";
 	}
+	
 	public static void register(Socket socket) throws IOException, JSONException {
 		
 		OutputStream os = socket.getOutputStream();
@@ -110,13 +107,42 @@ public class Politicien {
 	public static void get_letterpool_since(Socket socket,BufferedWriter bw,int period) throws JSONException, IOException {
 		
 		
-		byte [] a =intToBigEndian(("{ \"get_letterpool_since\":" + period + "null}").length());
+		byte [] a =intToBigEndian(("{ \"get_letterpool_since\":" + period + "}").length());
 		for(int i = a.length-1 ;i>=0 ;i--) {
 			bw.write((char)(a[i]));
 		}
 		System.out.println("{ \"listen\" : null }");
 		bw.write("{ \"get_letterpool_since\":" + period + "}");
 		bw.flush();
+		int c;
+		InputStream is = socket.getInputStream();
+		InputStreamReader isr = new InputStreamReader(is);
+		BufferedReader br = new BufferedReader(isr);
+		String res = "";
+		Boolean debutRep = false;
+		while (br.ready()) {
+			c = br.read();
+			
+			if(debutRep) {
+				if(c>=34 && c<=127) {
+					res = res + (char)c;
+					System.out.println("char : " + (char)c);
+				}
+			}
+			
+			if((char)c =='^') {
+				debutRep = true;
+			}
+			
+			 //System.out.println("Message received from the server : " + (char)c  );
+		}
+		System.out.println("je suis res" + res);
+		
+		Gson gson = new Gson();
+		//{"current_period":0,"next_period":1,"letters":[]}
+		DiffLetterPool difletterPool = gson.fromJson(res, DiffLetterPool.class);
+		scrabblos.DiffLetterPool.LetterPool letterpool = difletterPool.getLetterpool();
+		System.out.println(letterpool.getCurrent_period());
 	}
 
 
@@ -143,7 +169,9 @@ public class Politicien {
 		bw.flush();
 	}
 	
-
+	public static void make_word(DiffLetterPool dffl) {
+		//dans cette class nous devons ecrire l'algo de creation d'un mot
+	}
 	
 	public static void inject_word(Socket s, String word) throws IOException, JSONException {
 		OutputStream os = socket.getOutputStream();
@@ -177,8 +205,10 @@ public class Politicien {
 			OutputStreamWriter osw = new OutputStreamWriter(os);
 			BufferedWriter bw = new BufferedWriter(osw);
 			// Send the message to the server
-			generatePublicKey();
-			//ArrayList<Character> LetterBag = register(socket);
+			//generatePublicKey();
+			register(socket);
+			System.out.println("OUI JE RENTRE");
+			get_letterpool_since(socket,bw,0);
 			//System.out.println(LetterBag);
 			//inject_Letter(socket,LetterBag,bw);
 			//inject_Letter(socket,LetterBag);

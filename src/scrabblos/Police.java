@@ -1,5 +1,7 @@
 package scrabblos;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.ArrayList;
 
 public class Police {
@@ -15,19 +17,34 @@ public class Police {
 		}
 		return true;
 	}
-	private void makeWord(LettreDisp lettre_disp) {
+	private static void makeWord(LettreDisp lettre_disp) {
+		JSONParser parser = new JSONParser();
+		JSONObject json = (JSONObject) parser.parse(stringToParse);
 		String word="";
 		for(LettreDisp p :word_current) {
 			word+=p.getLetter();
 		}
-		
-		
+	}
+	
+	public static ArrayList<String> makeDictionnary(String fileName) {
+		  try {
+	            String line = null;
+	            FileReader fileReader = new FileReader(fileName);
+	            BufferedReader bufferedReader = new BufferedReader(fileReader);
+	            ArrayList<String> strings = new ArrayList<String>();
+
+	            while ((line = bufferedReader.readLine()) != null) {
+	                strings.add(line);
+	            }
+	            return strings;
+
+	        } catch (Exception e) {
+	        	return null;
+	        }
 	}
 	
 	public static void main() {
-		dictionnary = new ArrayList<String> ();
-		dictionnary.add("bonjour");
-		dictionnary.add("bon");
+		dictionnary = makeDictionnary("dict_dict_100000_1_10.txt");
 		
 		LettreDisp letter1 = new LettreDisp('c',5);
 		LettreDisp letter2 = new LettreDisp('c',2);

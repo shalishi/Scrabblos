@@ -34,9 +34,11 @@ import net.i2p.crypto.eddsa.spec.EdDSAPublicKeySpec;
 public class Client {
 
 	private static Socket socket;
-	private String getPublicKey() {
+	private static String generatePublicKey() {
 		try {
 			Signature sgr = new EdDSAEngine(MessageDigest.getInstance("SHA-512"));
+			
+			System.out.println(sgr);
 		} catch (NoSuchAlgorithmException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -147,7 +149,6 @@ public class Client {
 	}
 	
 	
-	
 	public static void get_full_letterpool(Socket socket,BufferedWriter bw) throws JSONException, IOException {
 		
 		
@@ -159,28 +160,43 @@ public class Client {
 		bw.write("{ \"get_full_letterpool\": null}");
 		bw.flush();
 	}
-
 	
-	public static void inject_word(Socket s, String word) throws IOException, JSONException {
-		OutputStream os = socket.getOutputStream();
-		OutputStreamWriter osw = new OutputStreamWriter(os);
-		BufferedWriter bw = new BufferedWriter(osw);
-		JSONObject json = new JSONObject();
-		json.put("inject_word", word);
-		byte [] a =intToBigEndian(json.toString().length());
-		System.out.println(a);
-		//byte [] a =intToBigEndian(("{ \"Inject_letter\" : "+  letter+ " }").length());
+	public static void get_letterpool_since(Socket socket,BufferedWriter bw,int period) throws JSONException, IOException {
+		
+		
+		byte [] a =intToBigEndian(("{ \"get_letterpool_since\":" + period + "null}").length());
 		for(int i = a.length-1 ;i>=0 ;i--) {
-			System.out.println("what" + (char)(a[i]));
 			bw.write((char)(a[i]));
 		}
-		//System.out.println("{ \"Inject_letter\" : " + letter + " }");
-		bw.write(json.toString());
-		//bw.write("{ \"Inject_letter\" : " +  letter +" }");
+		System.out.println("{ \"listen\" : null }");
+		bw.write("{ \"get_letterpool_since\":" + period + "}");
+		bw.flush();
+	}
+
+
+	public static void get_full_wordpool(Socket socket,BufferedWriter bw) throws JSONException, IOException {
+		
+		byte [] a =intToBigEndian("{ \"get_full_wordpool\": null}".length());
+		for(int i = a.length-1 ;i>=0 ;i--) {
+			bw.write((char)(a[i]));
+		}
+		System.out.println("{ \"listen\" : null }");
+		bw.write("{ \"get_full_wordpool\": null}");
 		bw.flush();
 	}
 	
-
+	public static void get_wordpool_since(Socket socket,BufferedWriter bw,int period) throws JSONException, IOException {
+		
+		
+		byte [] a =intToBigEndian(("{ \"get_wordpool_since\":" + period + "null}").length());
+		for(int i = a.length-1 ;i>=0 ;i--) {
+			bw.write((char)(a[i]));
+		}
+		System.out.println("{ \"listen\" : null }");
+		bw.write("{ \"get_wordpool_since\":" + period + "}");
+		bw.flush();
+	}
+	
 	public static void main(String args[]) {
 		try {
 			String host = "localhost";
@@ -193,9 +209,10 @@ public class Client {
 			OutputStreamWriter osw = new OutputStreamWriter(os);
 			BufferedWriter bw = new BufferedWriter(osw);
 			// Send the message to the server
-			ArrayList<Character> LetterBag = register(socket);
-			System.out.println(LetterBag);
-			inject_Letter(socket,LetterBag,bw);
+			generatePublicKey();
+			//ArrayList<Character> LetterBag = register(socket);
+			//System.out.println(LetterBag);
+			//inject_Letter(socket,LetterBag,bw);
 			//inject_Letter(socket,LetterBag);
 			//continous_listen(socket,bw);
 			//get_full_letterpool(socket,bw);

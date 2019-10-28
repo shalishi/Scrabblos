@@ -31,12 +31,20 @@ public class ED25519 {
 	public KeyPair generateKeys() {
 		return gen.generateKeyPair();
 	}
-	public static byte[] sign (KeyPair k, byte[] msg) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+	public static byte[] sign2 (KeyPair k, byte[] msg) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
 		Signature sig = Signature.getInstance("ED_25519");
 		sig.initSign(k.getPrivate());
 		sig.update(msg);
 		byte[] s = sig.sign();
 		return s;
+	}
+	
+	public static byte[] sign(KeyPair k, byte[] msg) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+		EdDSAParameterSpec spec = EdDSANamedCurveTable.getByName(EdDSANamedCurveTable.ED_25519);
+		Signature sig = new EdDSAEngine(MessageDigest.getInstance(spec.getHashAlgorithm()));
+		sig.initSign(k.getPrivate());
+		sig.update(msg);
+		return sig.sign();
 	}
 	
 	

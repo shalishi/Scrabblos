@@ -1,13 +1,13 @@
 package scrabblos;
 
 public class Letter {
-	private char letter;
+	private String letter;
 	private int period;
 	private String head;
 	private String author;
 	private String signature;
 	
-	public Letter(char letter, int period, String hash, String author, String signature) {
+	public Letter(String letter, int period, String hash, String author, String signature) {
 		super();
 		this.letter = letter;
 		this.period = period;
@@ -16,10 +16,10 @@ public class Letter {
 		this.signature = signature;
 	}
 	
-	public char getLetter() {
+	public String getLetter() {
 		return letter;
 	}
-	public void setLetter(char letter) {
+	public void setLetter(String letter) {
 		this.letter = letter;
 	}
 	public int getPeriod() {

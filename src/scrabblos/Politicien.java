@@ -294,7 +294,7 @@ public class Politicien {
 		ArrayList<Letter> wordletters = (ArrayList<Letter>) wordAct.getWord().clone();
 		int i = wordletters.size();
 		for(Letter l:letters) {
-			if(l.getLetter() == motDes.charAt(i)) {
+			if(l.getLetter().charAt(0) == motDes.charAt(i)) {
 				wordletters.add(l);		
 			}
 		}
@@ -333,7 +333,7 @@ public class Politicien {
 			}else {
 				//there,we can chose the longest or the first accord or random--i chose first accord
 				for(Letter letter : letters) {
-					if(letter.getLetter() != s.charAt(i)) {
+					if(letter.getLetter().charAt(0) != s.charAt(i)) {
 						break;
 					}
 				}
@@ -366,7 +366,7 @@ public class Politicien {
 			 ArrayList<Letter> first =  get_full_letterpool(socket,bw);
 			    int length =  first.size();
 			    Letter letter  = first.get((int) (Math.random()*length));
-			    char lettre = letter.getLetter();
+			    char lettre = letter.getLetter().charAt(0);
 			 ArrayList<String> dictionairy = makeDictionnary("src/dict_dict_100000_1_10.txt");
 			    //pour meme lettre de commence, il y a des mots different a choisir
 			    ArrayList<String> choix = new  ArrayList<String>();

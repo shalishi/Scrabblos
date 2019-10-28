@@ -8,9 +8,6 @@ public class Word {
 	private String politicien;
 	private String signature;
 	
-	
-	
-	
 	public Word(ArrayList<Letter> word, String hash, String politicien, String signature) {
 		super();
 		this.word = word;

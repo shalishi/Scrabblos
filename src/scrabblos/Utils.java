@@ -48,6 +48,23 @@ public class Utils {
 		return ED25519.sign(kp,hashf);
 	}
 	
+	public static byte[] signature2Poli(Word w,byte[] hash,KeyPair kp) throws NoSuchAlgorithmException, IOException, InvalidKeyException, SignatureException {
+		//Faut rajouter une condition comme quoi si le wordpool est vide on passe ici
+		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		for(int i = 0; i<w.getWord().size(); i++) {
+			outputStream.write(w.getWord().get(i).getLetter().getBytes());
+		}
+		outputStream.write(hash);
+		
+		EdDSAPublicKey public_k = (EdDSAPublicKey) kp.getPublic();
+		outputStream.write(public_k.getAbyte());
+		byte[] hashf = digest.digest(outputStream.toByteArray());
+		
+		return ED25519.sign(kp,hashf);
+	}
+	
+	
 	public static byte[] intToBigEndian(int numero) {
 		ByteBuffer bb = ByteBuffer.allocate(8);
 		bb.rewind();

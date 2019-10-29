@@ -2,6 +2,10 @@ package scrabblos;
 
 import java.util.ArrayList;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 public class Word {
 	private ArrayList<Letter> word;
 	private String head;
@@ -38,6 +42,15 @@ public class Word {
 	}
 	public void setSignature(String signature) {
 		this.signature = signature;
+	}
+	
+	public JSONArray wordArray() throws JSONException {
+		JSONArray wordArray = new JSONArray();
+		for(Letter l : word) {
+			JSONObject letter = new JSONObject(l.toString2());
+			wordArray.put(letter);
+		}
+		return wordArray;
 	}
 	
 	

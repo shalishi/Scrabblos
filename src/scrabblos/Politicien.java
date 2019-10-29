@@ -93,22 +93,29 @@ public class Politicien {
        return wordAct;
 	}
 
-	public static void inject_word(Socket s, String word) throws IOException, JSONException {
+	public static void inject_word(Socket s, Word w) throws IOException, JSONException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+		MessageDigest digest = MessageDigest.getInstance("SHA-256");
 		OutputStream os = socket.getOutputStream();
 		OutputStreamWriter osw = new OutputStreamWriter(os);
 		BufferedWriter bw = new BufferedWriter(osw);
 		JSONObject json = new JSONObject();
-		json.put("inject_word", word);
+		
+		
+		json.put("word",w.wordArray());
+		json.put("head", Utils.bytesToHex(digest.digest(("").getBytes())));
+		json.put("politicien", pk);
+		json.put("signature",Utils.bytesToHex(Utils.signature2Poli(w,digest.digest(("").getBytes()), kp)));
+		
+		JSONObject json2 = new JSONObject();
+		json2.put("inject_word",json );
+		
 		byte[] a = Utils.intToBigEndian(json.toString().length());
-		System.out.println(a);
-		// byte [] a =Utils.intToBigEndian(("{ \"Inject_letter\" : "+ letter+ " }").length());
+		
 		for (int i = a.length - 1; i >= 0; i--) {
 			System.out.println("what" + (char) (a[i]));
 			bw.write((char) (a[i]));
 		}
-		// System.out.println("{ \"Inject_letter\" : " + letter + " }");
 		bw.write(json.toString());
-		// bw.write("{ \"Inject_letter\" : " + letter +" }");
 		bw.flush();
 	}
 	

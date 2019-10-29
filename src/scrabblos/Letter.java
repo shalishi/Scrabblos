@@ -47,4 +47,12 @@ public class Letter {
 		this.signature = signature;
 	}
 	
+	public String toString() {
+		return "{ \"letter\" : " + letter + "\"	period \" :" + period + "\" head\" :"+ head + "\"author\" :"+ author +"\"signature\" :" + signature+"}"; 
+	}
+	
+	public String toString2() {
+		return "{ \"letter\" : \"" + letter + "\"\"	period \" : \"" + period + "\"\" head\" :\""+ head + "\"\"author\" :\""+ author + "\"\"signature\" :\"" + signature+"\"}"; 
+	}
+	
 }

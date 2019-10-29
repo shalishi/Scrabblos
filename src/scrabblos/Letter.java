@@ -2,12 +2,12 @@ package scrabblos;
 
 public class Letter {
 	private String letter;
-	private int period;
+	private long period;
 	private String head;
 	private String author;
 	private String signature;
 	
-	public Letter(String letter, int period, String hash, String author, String signature) {
+	public Letter(String letter, long period, String hash, String author, String signature) {
 		super();
 		this.letter = letter;
 		this.period = period;
@@ -22,7 +22,7 @@ public class Letter {
 	public void setLetter(String letter) {
 		this.letter = letter;
 	}
-	public int getPeriod() {
+	public long getPeriod() {
 		return period;
 	}
 	public void setPeriod(int period) {
@@ -47,12 +47,12 @@ public class Letter {
 		this.signature = signature;
 	}
 	
-	public String toString() {
+	public String toString2() {
 		return "{ \"letter\" : " + letter + "\"	period \" :" + period + "\" head\" :"+ head + "\"author\" :"+ author +"\"signature\" :" + signature+"}"; 
 	}
 	
-	public String toString2() {
-		return "{ \"letter\" : \"" + letter + "\"\"	period \" : \"" + period + "\"\" head\" :\""+ head + "\"\"author\" :\""+ author + "\"\"signature\" :\"" + signature+"\"}"; 
+	public String toString() {
+		return "{ \"letter\" : \"" + letter + "\",\"period\" : \"" + period + "\",\"head\" :\""+ head + "\",\"author\" :\""+ author + "\",\"signature\" :\"" + signature+"\"}"; 
 	}
 	
 }

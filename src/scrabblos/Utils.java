@@ -2,6 +2,7 @@ package scrabblos;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
 import java.io.FileReader;
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -92,5 +93,22 @@ public class Utils {
 		} catch (Exception e) {
 			return null;
 		}
+	}
+	
+	public static String readAnswer(DataInputStream is) {
+		byte size_of_msg_bytes[] = new byte[8];
+		String msgreadtostr = "";
+		try {
+			is.read(size_of_msg_bytes);
+			ByteBuffer wrapped = ByteBuffer.wrap(size_of_msg_bytes);
+			long size_of_msg = wrapped.getLong();
+			byte msgread[] = new byte[(int) size_of_msg];
+			is.read(msgread);
+			msgreadtostr = new String(msgread);
+		}catch (IOException e) {
+			// TODO: handle exception
+			e.printStackTrace();
+		}
+		return msgreadtostr;
 	}
 }

@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.ObjectInputStream.GetField;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
@@ -45,7 +46,7 @@ public class Politicien {
 	private static int periode = 10;//loneur de periode;
 	private static String pk;
 	private static KeyPair kp;
-
+	
 	public static void register(Socket socket) throws IOException, JSONException, NoSuchAlgorithmException, NoSuchProviderException {
 
 		OutputStream os = socket.getOutputStream();
@@ -101,10 +102,17 @@ public class Politicien {
 		JSONObject json = new JSONObject();
 		
 		
-		json.put("word",w.wordArray());
+		/*json.put("word",w.wordArray());
 		json.put("head", Utils.bytesToHex(digest.digest(("").getBytes())));
 		json.put("politicien", pk);
 		json.put("signature",Utils.bytesToHex(Utils.signature2Poli(w,digest.digest(("").getBytes()), kp)));
+		*/
+		
+		json.put("word",w.wordArray());
+		json.put("head", w.getHash());
+		json.put("politicien", w.getPoliticien());
+		json.put("signature",w.getSignature());
+		
 		
 		JSONObject json2 = new JSONObject();
 		json2.put("inject_word",json );
@@ -152,6 +160,10 @@ public class Politicien {
 			// generatePublicKey();
 			register(socket);
 			System.out.println("OUI JE RENTRE");
+			DiffWordPool wp = CommonOperations.get_wordpool_since(socket,bw,0);
+			System.out.println(wp.getWordpool().getWords());
+			//Word w = new Word(word, hash, politicien, signature);
+			//inject_word()
 			/*CommonOperations.get_letterpool_since(socket, bw, 0);
 			// System.out.println(LetterBag);
 			// inject_Letter(socket,LetterBag,bw);

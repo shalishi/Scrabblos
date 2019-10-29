@@ -12,7 +12,7 @@ public class LetterPool {
 		this.next_period = next_period;
 		this.letters = letters;
 	}
-
+	
 	public long getCurrent_period() {
 		return current_period;
 	}

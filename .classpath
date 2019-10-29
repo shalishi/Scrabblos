@@ -12,6 +12,5 @@
 	<classpathentry kind="lib" path="/home/fatemeh/Bureau/jar_files (2)/simplejson-to-easyjson-2.0.5.jar"/>
 	<classpathentry kind="lib" path="/home/fatemeh/Bureau/jar_files (2)/easyjson-core-2.0.5.jar"/>
 	<classpathentry kind="lib" path="/home/fatemeh/Musique/jar_files (3)/gson-2.8.2.jar"/>
-	<classpathentry kind="lib" path="/Users/wangxin/Downloads/gson-2.8.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

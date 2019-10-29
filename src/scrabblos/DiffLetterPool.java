@@ -4,15 +4,15 @@ import java.util.ArrayList;
 
 
 public class DiffLetterPool {
-	private int since;
+	private long since;
 	private LetterPool letterpool;
 	
-	public DiffLetterPool(int since, LetterPool letterpool) {
+	public DiffLetterPool(long since, LetterPool letterpool) {
 		this.since = since;
 		this.letterpool = letterpool;
 	}
 
-	public int getSince() {
+	public long getSince() {
 		return since;
 	}
 

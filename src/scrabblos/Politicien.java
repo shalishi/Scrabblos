@@ -1,51 +1,46 @@
 package scrabblos;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream.GetField;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
-import java.security.Signature;
 import java.security.SignatureException;
 import java.util.ArrayList;
-import java.util.Timer;
-import java.util.TimerTask;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
-
-import net.i2p.crypto.eddsa.EdDSAEngine;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
-import net.i2p.crypto.eddsa.spec.EdDSANamedCurveTable;
-import net.i2p.crypto.eddsa.spec.EdDSAParameterSpec;
 
 public class Politicien {
 
 	private static Socket socket;
-	private static final String HOST = "localhost";
-	private static final int PORT = 12345;
-	private static int periode = 10;//loneur de periode;
 	private static String pk;
 	private static KeyPair kp;
+	
+	public Politicien(Socket socket, String pk,KeyPair kp) {
+		this.socket = socket;
+		this.pk = pk;
+		this.kp = kp;
+		
+	}
+	
+	public static String getPk() {
+		return pk;
+	}
+
+	public static String getSign() throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException {
+		MessageDigest digest = MessageDigest.getInstance("SHA-256");
+		return Utils.bytesToHex(Utils.signature2("a",digest.digest(("").getBytes()), 0, kp));
+	}
+
 	
 	public static void register(Socket socket) throws IOException, JSONException, NoSuchAlgorithmException, NoSuchProviderException {
 

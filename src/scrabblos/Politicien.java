@@ -127,24 +127,50 @@ public class Politicien {
 		bw.flush();
 	}
 	
+	public static boolean isWord(ArrayList<String> dictionaire,Word wordAct) {
+		ArrayList<Letter> word = wordAct.getWord();
+		for(String s : dictionaire) {
+			if(s.length() == word.size()) {
+				boolean is = true;
+				for(int i = 0;i<s.length() ;i++) {
+					if(s.charAt(i) != word.get(i).getLetter().charAt(0)) {
+						is = false;
+						break;
+					}
+				}
+				if(is) return true;
+			}
+		}
+		
+		return false;
+	}
+	
 	public static String findWordDestinaire(ArrayList<String> dictionaire,Word wordAct) {
+		System.out.println(" po find   ----> wordAct = " + wordAct.getWord());
 		ArrayList<Letter> letters = wordAct.getWord();
 		for(String s: dictionaire) {
 			int i = 0;
+			System.out.print(s);
 			if(s.length()<=letters.size()) {
+				System.out.println(" --> too short!!!");
 				continue;
 			}else {
 				//there,we can chose the longest or the first accord or random--i chose first accord
 				for(Letter letter : letters) {
-					if(letter.getLetter().charAt(0) != s.charAt(i)) {
+					if(letter.getLetter().charAt(0) == s.charAt(i)) {
+						i++;
+						continue;
+					}else {
+						System.out.println(" --> not match!!!");
 						break;
 					}
 				}
-				return s;
+				if(i == letters.size()) return s;
 			}
 		}
 		return null;	
 	}
+
 
 	public static void main(String args[]) {
 		try {

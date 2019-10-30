@@ -100,30 +100,22 @@ public class Politicien {
 		OutputStreamWriter osw = new OutputStreamWriter(os);
 		BufferedWriter bw = new BufferedWriter(osw);
 		JSONObject json = new JSONObject();
-		
-		
-		/*json.put("word",w.wordArray());
+		json.put("word",w.wordArray());
 		json.put("head", Utils.bytesToHex(digest.digest(("").getBytes())));
 		json.put("politicien", pk);
 		json.put("signature",Utils.bytesToHex(Utils.signature2Poli(w,digest.digest(("").getBytes()), kp)));
-		*/
-		
-		json.put("word",w.wordArray());
-		json.put("head", w.getHash());
-		json.put("politicien", w.getPoliticien());
-		json.put("signature",w.getSignature());
-		
 		
 		JSONObject json2 = new JSONObject();
 		json2.put("inject_word",json );
 		
-		byte[] a = Utils.intToBigEndian(json.toString().length());
+		byte[] a = Utils.intToBigEndian(json2.toString().length());
 		
 		for (int i = a.length - 1; i >= 0; i--) {
 			System.out.println("what" + (char) (a[i]));
 			bw.write((char) (a[i]));
 		}
-		bw.write(json.toString());
+		System.out.println("inject word:" + w.getWord());
+		bw.write(json2.toString());
 		bw.flush();
 	}
 	

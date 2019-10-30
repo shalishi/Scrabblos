@@ -44,11 +44,10 @@ public class Word {
 		this.signature = signature;
 	}
 	
-	public JSONArray wordArray() throws JSONException {
-		JSONArray wordArray = new JSONArray();
+	public String wordArray() throws JSONException {
+		String wordArray ="";
 		for(Letter l : word) {
-			JSONObject letter = new JSONObject(l.toString2());
-			wordArray.put(letter);
+			wordArray += l.toString2();
 		}
 		return wordArray;
 	}

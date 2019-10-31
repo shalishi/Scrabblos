@@ -1,7 +1,10 @@
 package scrabblos;
 
 import java.io.BufferedWriter;
+import java.io.DataInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
@@ -25,13 +28,18 @@ public class Politicien {
 	private static String pk;
 	private static KeyPair kp;
 	
+	public Politicien(Socket socket) {
+		this.socket = socket;
+
+	}
+	
 	public Politicien(Socket socket, String pk,KeyPair kp) {
 		this.socket = socket;
 		this.pk = pk;
 		this.kp = kp;
 		
 	}
-	
+
 	public static String getPk() {
 		return pk;
 	}
@@ -63,6 +71,12 @@ public class Politicien {
 		}
 		bw.write(json.toString());
 		bw.flush();
+		InputStream is = socket.getInputStream();
+		InputStreamReader isr = new InputStreamReader(is);
+		DataInputStream di = new DataInputStream(is);
+		String res = Utils.readAnswer(di);
+		// TRANSFORMATION DE LA REPONSE SOUS FORME DE LISTE DE LETTER
+		System.out.println("je suis res" + res);
 		
 	}
 
@@ -89,20 +103,25 @@ public class Politicien {
        return wordAct;
 	}
 
-	public static void inject_word(Socket s, Word w) throws IOException, JSONException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+	public static void inject_word(Socket s, Word w,BufferedWriter bw) throws IOException, JSONException, NoSuchAlgorithmException, InvalidKeyException, SignatureException {
+		//System.out.println("je suis le mot trouvé" + w.getWord());
 		MessageDigest digest = MessageDigest.getInstance("SHA-256");
-		OutputStream os = socket.getOutputStream();
-		OutputStreamWriter osw = new OutputStreamWriter(os);
-		BufferedWriter bw = new BufferedWriter(osw);
+		
 		JSONObject json = new JSONObject();
 		json.put("word",w.wordArray());
-		json.put("head", Utils.bytesToHex(digest.digest(("").getBytes())));
-		json.put("politicien", pk);
-		json.put("signature",Utils.bytesToHex(Utils.signature2Poli(w,digest.digest(("").getBytes()), kp)));
+		//json.put("head", Utils.bytesToHex(digest.digest(("").getBytes())));
+		//json.put("politicien", pk);
+		//json.put("signature",Utils.bytesToHex(Utils.signature2Poli(w,digest.digest(("").getBytes()), kp)));
+		
+		json.put("politicien", w.getPoliticien());
+		json.put("signature",w.getSignature() );
+		json.put("head", w.getHash());
 		
 		JSONObject json2 = new JSONObject();
 		json2.put("inject_word",json );
 		
+		System.out.println("taille" + json2.toString().length());
+
 		byte[] a = Utils.intToBigEndian(json2.toString().length());
 		
 		for (int i = a.length - 1; i >= 0; i--) {
@@ -161,11 +180,11 @@ public class Politicien {
 
 	public static void main(String args[]) {
 		try {
-			InetAddress address = InetAddress.getByName(HOST);
+			//InetAddress address = InetAddress.getByName(HOST);
 			MessageDigest digest = MessageDigest.getInstance("SHA-256");
 
 			// System.err.print(address);
-			socket = new Socket(address, PORT);
+			//socket = new Socket(address, PORT);
 			OutputStream os = socket.getOutputStream();
 			OutputStreamWriter osw = new OutputStreamWriter(os);
 			BufferedWriter bw = new BufferedWriter(osw);

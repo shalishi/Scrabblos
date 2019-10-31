@@ -77,7 +77,7 @@ public class Client {
 	
 	public static void inject_Letter(Socket s, ArrayList<String> LetterBag,String hash,BufferedWriter bw) throws IOException, JSONException, InvalidKeyException, NoSuchAlgorithmException, SignatureException {
 		MessageDigest digest = MessageDigest.getInstance("SHA-256");
-
+		
 		Letter l = choose_Letter(LetterBag,hash);
 		JSONObject json = new JSONObject();
 		json.put("letter", l.getLetter());

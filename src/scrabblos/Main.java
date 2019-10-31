@@ -54,9 +54,9 @@ public class Main {
 		String pk = Utils.bytesToHex(public_k.getAbyte());
 		
 		
-		Politicien po1 = new Politicien(socket, pk, kp);
+		Politicien po1 = new Politicien(socket);
 		po1.register(socket);
-		LetterPool lp2 = CommonOperations.get_full_letterpool(socket, bw);
+		DiffLetterPool lp2 = CommonOperations.get_letterpool_since(socket, bw,0);
 	
 		
 //		System.out.println("dictionaire : " + dictionaire);
@@ -64,14 +64,14 @@ public class Main {
 		ArrayList<Letter> word = new ArrayList<Letter>();
 		String sig = po1.getSign();
 		Word wordAct = new Word(word, "", pk, sig);
-		letters.addAll(lp.getLetters());
+		letters.addAll(lp2.getLetterpool().getLetters());
 		Letter l = letters.get((int) (Math.random() * (letters.size() - 1)));
 		System.out.println("wordAct = " + l.getLetter());
 		word.add(l);
 		String wordDest = po1.findWordDestinaire(dictionaire, wordAct);
-		wordAct = po1.make_word(lp, wordDest, wordAct);
+		wordAct = po1.make_word(lp2, wordDest, wordAct);
 		if(po1.isWord(dictionaire, wordAct)) {
-			po1.inject_word(socket,wordAct);
+			po1.inject_word(socket,wordAct,bw);
 		}
 //		WordPool wordpool = CommonOperations.get_full_wordpool(socket,bw);
 //		DiffWordPool dwordpool = CommonOperations.get_wordpool_since(socket,bw,0);

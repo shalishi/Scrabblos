@@ -177,7 +177,7 @@ public class Politicien {
 		return null;	
 	}
 
-
+/*
 	public static void main(String args[]) {
 		try {
 			//InetAddress address = InetAddress.getByName(HOST);
@@ -255,6 +255,6 @@ public class Politicien {
 				System.out.println("e : " + e.getMessage());
 			}
 		}
-	}
+	}*/
 
 }

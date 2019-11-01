@@ -26,6 +26,16 @@ public class Client implements Runnable {
 	private static KeyPair kp;
 	private ArrayList<String> LetterBag = new ArrayList<String>();
 	private String hash = "";
+	private char[] bags = { 'b', 'd', 'u', 'q', 's', 'y', 'o', 'r', 'r', 'p', 'm', 'e', 'p', 'y', 's', 'l', 't', 'h',
+			'u', 'i', 'n', 'p', 'w', 't', 'w', 'a', 'e', 's', 'r', 'c', 'y', 'c', 'u', 'j', 'x', 't', 'i', 'o', 'k',
+			'k', 'c', 'c', 'l', 'w', 'y', 'c', 'w', 'o', 'y', 'x', 'g', 'c', 'u', 'y', 'g', 's', 's', 'c', 'q', 'q',
+			'a', 'x', 'd', 'm', 'j', 'e', 'l', 'f', 'f', 'g', 'k', 'x', 'p', 'm', 'j', 'x', 'a', 'y', 'g', 'p', 'd',
+			'g', 'g', 'i', 'j', 'o', 'g', 'w', 'r', 'a', 'd', 'b', 'p', 'm', 'o', 'e', 'p', 'v', 't', 'h', 'a', 'm',
+			'v', 'm', 'f', 'f', 'e', 's', 'v', 'r', 'o', 'v', 'h', 'o', 'v', 'q', 'a', 'm', 'c', 'b', 'e', 'q', 'g',
+			'd', 'p', 'd', 'x', 'q', 'k', 'f', 'p', 'k', 'f', 'a', 's', 'k', 'c', 'x', 'q', 'h', 'i', 'r', 'w', 's',
+			's', 'r', 'r', 'q', 'u', 'g', 's', 'n', 'x', 'f', 't', 'q', 'a', 'v', 'r', 'p', 't', 'n', 'h', 'p', 's',
+			'j', 'w', 'p', 'y', 'x', 'b', 't', 'v', 'v', 'g', 'a', 'y', 'q', 'm', 'k', 'm', 'x', 'c', 't', 'u', 'n',
+			'g', 'e', 'o', 'w', 'o', 'l', 'l', 'f', 'o', 'd', 'l', 'b', 'p', 'x' };
 
 	@Override
 	public void run() {
@@ -34,11 +44,10 @@ public class Client implements Runnable {
 			System.out.println("Thread Client" + Thread.currentThread().getId() + " is running");
 			creatKey();
 			// LetterBag = new ArrayList<String>();
-			LetterBag.add("a");
-			LetterBag.add("b");
-			LetterBag.add("c");
-			LetterBag.add("d");
-			LetterBag.add("e");
+
+			for(char c:bags) {
+				LetterBag.add(c+"");
+			}
 
 			updateLetterPool();
 			/*
@@ -83,32 +92,18 @@ public class Client implements Runnable {
 	}
 
 	protected void updateLetterPool() {
-		try {
+		
 			System.out.println("update letter pool");
-			MessageDigest digest = MessageDigest.getInstance("SHA-256");
 			Letter l = choose_Letter(LetterBag, hash);
-			JSONObject json = new JSONObject();
-			json.put("letter", l.getLetter());
-			json.put("author", l.getAuthor());
-			json.put("signature", l.getSignature());
-			json.put("head", l.getHash());
-			json.put("period", l.getPeriod());
 
-			JSONObject json2 = new JSONObject();
-			json2.put("inject_letter", json);
-
-			String j = "{ \"inject_letter\": { \"letter\":\"a\", \"period\":0, \"head\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"author\":\"b7b597e0d64accdb6d8271328c75ad301c29829619f4865d31cc0c550046a08f\", \"signature\":\"8b6547447108e11c0092c95e460d70f367bc137d5f89c626642e1e5f2ce\" }}";
+			//String j = "{ \"inject_letter\": { \"letter\":\"a\", \"period\":0, \"head\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"author\":\"b7b597e0d64accdb6d8271328c75ad301c29829619f4865d31cc0c550046a08f\", \"signature\":\"8b6547447108e11c0092c95e460d70f367bc137d5f89c626642e1e5f2ce\" }}";
 
 			synchronized (MotorA.getMotorA()) {
 				MotorA motor = MotorA.getMotorA();
-				motor.addLetter(json2.toString());
+				motor.addLetter(l);
 				motor.showLetterPool();
 			}
-			// showLetterPool();
-		} catch (NoSuchAlgorithmException | JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+
 	}
 
 }

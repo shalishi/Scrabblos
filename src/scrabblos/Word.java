@@ -47,9 +47,14 @@ public class Word {
 	public String wordArray() throws JSONException {
 		String wordArray ="";
 		for(Letter l : word) {
-			wordArray += l.toString2();
+			wordArray += l.toString();
 		}
 		return wordArray;
+	}
+	
+	public String toString() {
+		return "word : "+ this.word+" ,head : "+head+" ,politicien : "+this.politicien + " ,signature : "+this.signature;
+				
 	}
 	
 	

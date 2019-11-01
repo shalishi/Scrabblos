@@ -101,6 +101,7 @@ public class Client {
 		bw.flush();
 	}
 	
+	/*
 	public static void main(String args[]) {
 		try {
 			String host = "localhost";
@@ -143,7 +144,7 @@ public class Client {
 				System.out.println("e : " + e.getMessage());
 			}
 		}
-	}
+	}*/
 	
 }
 

@@ -61,6 +61,14 @@ public class Word {
 				
 	}
 	
+	public String toWord() {
+		String wordArray ="";
+		for(Letter l : this.word) {
+			wordArray += l.getLetter();
+		}
+		return wordArray;		
+	}
+	
 	
 	
 }

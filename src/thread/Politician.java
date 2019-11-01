@@ -23,6 +23,7 @@ public class Politician implements Runnable {
 	private static KeyPair kp;// signature
 	private Word wordAct;
 	private ArrayList<String> wordDes;
+	private String hash = ""+Math.random()*100;
 	ArrayList<String> dictionary;
 
 	@Override
@@ -30,24 +31,23 @@ public class Politician implements Runnable {
 		try {
 			dictionary = Utils.makeDictionnary("src/dict_dict_100000_1_10.txt");
 			CreateKey();
-			wordAct = new Word(new ArrayList<Letter>(),"","","");
+			MessageDigest digest = MessageDigest.getInstance("SHA-256");
+			String head = Utils.bytesToHex(digest.digest((hash).getBytes()));
+			wordAct = new Word(new ArrayList<Letter>(),head,"","");
 			System.out.println("Thread Politician" + Thread.currentThread().getId() + " is running");
-			int i = 0;
 			final long NANOSEC_PER_SEC = 1000l*1000*1000;
 
 			long startTime = System.nanoTime();
 			while ((System.nanoTime()-startTime)< 1*2*NANOSEC_PER_SEC){
 				Word word = makeWord();
 				if (word != null) {
-					if(inDictionary(word)) {
-						updateWordPool(word);
-						//break;
-						if(i==2)break;
+					if(!inWordPool(word)) {
+						if(inDictionary(word)) {
+							updateWordPool(word);
+							//break;
+						}
 					}
 				}
-				//i++;
-				//if(i==8)break;
-				//readLetterPool();
 			}
 			showWordPool();
 
@@ -58,6 +58,20 @@ public class Politician implements Runnable {
 		}
 
 	}
+	
+	private boolean inWordPool(Word word) {
+		synchronized (MotorA.getMotorA()) {
+			MotorA motor = MotorA.getMotorA();
+			ArrayList<Word> wordpool = motor.getWord_pool();
+			for(Word w:wordpool) {
+				if(w.getPoliticien() == word.getPoliticien() && w.getWord().size() == word.getWord().size()) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+	
 	
 	private boolean inDictionary(Word word) {
 		boolean flag = true;
@@ -154,7 +168,7 @@ public class Politician implements Runnable {
 		if(lp.isEmpty()) return null;
 		MessageDigest digest = MessageDigest.getInstance("SHA-256");
 		String signture = Utils.bytesToHex(Utils.signature2("a", digest.digest(("").getBytes()), 0, kp));
-		String hash = "";
+		String head = Utils.bytesToHex(digest.digest((hash).getBytes()));
 		ArrayList<Letter> word = new ArrayList<Letter>();
 		boolean flag = false;
 		
@@ -166,6 +180,12 @@ public class Politician implements Runnable {
 			flag = true;
 		} else {			
 			word = (ArrayList<Letter>) this.wordAct.getWord().clone();
+			Word longest = getLongest();
+			System.out.println("I have :"+ word.size() +"letters, but wordpool have :"+longest.toString());
+			if(longest.getWord().size()>=word.size()) {
+				word = longest.getWord();
+				wordDes = findWordDestinaire(word);
+			}
 			int i = word.size();
 			for (String d : wordDes) {
 				for (Letter l : lp) {
@@ -189,7 +209,7 @@ public class Politician implements Runnable {
 		if (flag) {
 			this.wordAct.setWord(word);
 			this.wordAct.setSignature(signture);
-			this.wordAct.setHash(hash);
+			this.wordAct.setHash(head);
 			this.wordAct.setPoliticien(pk);
 			return this.wordAct;
 		} else {
@@ -215,6 +235,22 @@ public class Politician implements Runnable {
 			motor.showWordPool();
 		}
 
+	}
+	
+	private Word getLongest() {
+		synchronized (MotorA.getMotorA()) {
+			MotorA motor = MotorA.getMotorA();
+			ArrayList<Word> wordpool =  motor.getWord_pool();
+			Word word = null;
+			int max = 0;
+			for(Word w: wordpool) {
+				if(w.getWord().size()>max) {
+					word = w;
+					max = w.getWord().size();
+				}
+			}
+			return word;
+		}
 	}
 	
 	

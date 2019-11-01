@@ -111,4 +111,28 @@ class MotorA {
 
 	}
 
+	public void jugement() {
+		lock.lock();
+		ArrayList<Word> wordpool = getWord_pool();
+		ArrayList<Word> word = new ArrayList<Word>();
+		int max = 0;
+		for (Word w : wordpool) {
+			if (w.getWord().size() > max) {
+				word.clear();
+				word.add(w);
+				max = w.getWord().size();
+			}
+			if(w.getWord().size() == max) {
+				word.add(w);
+			}
+		}
+		Word winner = word.get(word.size()-1);
+		String str =  winner.getPoliticien() +" has won, the word is"+ winner.toWord() +" , win 20points and have " +winner.getWord().size() +"letters";
+		for(Letter l : winner.getWord()) {
+			str +=" ,"+l.getAuthor() +" got "+(double)(80/winner.getWord().size()) +"points";
+		}
+		
+		lock.unlock();
+	}
+
 }

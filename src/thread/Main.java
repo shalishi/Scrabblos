@@ -8,7 +8,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class Main {
 
 	public static void main(String args[]) {
-		int n = 8; // Number of clients 
+		int n = 28; // Number of clients 
 		ArrayList<Thread> clients = new ArrayList<Thread>();
         for (int i=0; i<n; i++) 
         { 

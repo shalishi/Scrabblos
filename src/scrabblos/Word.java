@@ -53,7 +53,11 @@ public class Word {
 	}
 	
 	public String toString() {
-		return "word : "+ this.word+" ,head : "+head+" ,politicien : "+this.politicien + " ,signature : "+this.signature;
+		String wordArray ="";
+		for(Letter l : this.word) {
+			wordArray += l.getLetter();
+		}
+		return "word : "+ wordArray+" ,head : "+this.head+" ,politicien : "+this.politicien + " ,signature : "+this.signature;
 				
 	}
 	

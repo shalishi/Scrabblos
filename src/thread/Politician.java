@@ -33,31 +33,38 @@ public class Politician implements Runnable {
 			wordAct = new Word(new ArrayList<Letter>(),"","","");
 			System.out.println("Thread Politician" + Thread.currentThread().getId() + " is running");
 			int i = 0;
-			while (true) {
+			final long NANOSEC_PER_SEC = 1000l*1000*1000;
+
+			long startTime = System.nanoTime();
+			while ((System.nanoTime()-startTime)< 1*2*NANOSEC_PER_SEC){
 				Word word = makeWord();
 				if (word != null) {
-					if(inDictionary()) {
-						updateWordPool(wordAct);
+					if(inDictionary(word)) {
+						updateWordPool(word);
 						//break;
-						i++;
-						if(i==1)break;
+						if(i==2)break;
 					}
 				}
+				//i++;
+				//if(i==8)break;
 				//readLetterPool();
 			}
+			showWordPool();
 
 		} catch (Exception e) {
 			// Throwing an exception
+			e.printStackTrace();
 			System.out.println("Exception is caught : " + e.toString() + e.getCause().getMessage());
 		}
 
 	}
 	
-	private boolean inDictionary() {
+	private boolean inDictionary(Word word) {
 		boolean flag = true;
 		for(String s : wordDes) {
-			for(int i=0;i<wordAct.getWord().size()-1;i++) {
-				if(wordAct.getWord().get(i).getLetter().charAt(0) != s.charAt(i)) {
+			for(int i=0;i<word.getWord().size()-1;i++) {
+				if(s.length()<=i)continue;
+				if(word.getWord().get(i).getLetter().charAt(0) != s.charAt(i)) {
 					flag = false;
 					break;
 				}
@@ -68,12 +75,12 @@ public class Politician implements Runnable {
 	}
 	
 	private boolean isValid(Letter l) {
-		for(Letter letterAct : wordAct.getWord()) {
+		for(Letter letterAct : this.wordAct.getWord()) {
 			if(letterAct.getAuthor() == l.getAuthor()) {
-				return false;
+				return true;
 			}
 		}
-		return true;
+      return true;
 	}
 
 	private void CreateKey() {
@@ -104,9 +111,8 @@ public class Politician implements Runnable {
 		}
 	}
 
-	public ArrayList<String> findWordDestinaire() {
+	public ArrayList<String> findWordDestinaire(ArrayList<Letter> letters) {
 		//System.out.println(" po find   ----> wordAct = " + wordAct.getWord());
-		ArrayList<Letter> letters = wordAct.getWord();
 		ArrayList<String> dest = new ArrayList<String>();
 		for (String s : dictionary) {
 			int i = 0;
@@ -131,6 +137,16 @@ public class Politician implements Runnable {
 		return dest;
 	}
 
+	public void showWordDes() {
+			System.out.println("show WORD DES+++++++++++++++++++++++++++++++++++++++++++++++++++++");
+			if (wordDes.size() > 0) {
+				for (String s : wordDes) {
+					System.out.println(s);
+				}
+			}
+			System.out.println("finish show  WORD DES+++++++++++++++++++++++++++++++++++++++++++++++"); 
+	}
+	
 	protected Word makeWord()
 			throws IOException, JSONException, InvalidKeyException, NoSuchAlgorithmException, SignatureException {
 		// dans cette class nous devons ecrire l'algo de creation d'un mot
@@ -145,16 +161,20 @@ public class Politician implements Runnable {
 		if (wordAct.getWord().size() == 0) {
 			Letter l = lp.get((int) (Math.random() * (lp.size() - 1)));
 			word.add(l);
-			wordDes = findWordDestinaire();
+			wordDes = findWordDestinaire(word);
+			showWordDes();
 			flag = true;
 		} else {			
-			word = (ArrayList<Letter>) wordAct.getWord().clone();
+			word = (ArrayList<Letter>) this.wordAct.getWord().clone();
 			int i = word.size();
 			for (String d : wordDes) {
 				for (Letter l : lp) {
+					if(d.length()<=i)continue;
 					if (l.getLetter().charAt(0) == d.charAt(i)) {
-						if(isValid(l)) {
+						Letter newL = l;
+						if(isValid(newL)) {
 							word.add(l);
+							wordDes = findWordDestinaire(word);
 							flag = true;
 							break;
 						}
@@ -167,11 +187,11 @@ public class Politician implements Runnable {
 		
 		
 		if (flag) {
-			wordAct.setWord(word);
-			wordAct.setSignature(signture);
-			wordAct.setHash(hash);
-			wordAct.setPoliticien(pk);
-			return wordAct;
+			this.wordAct.setWord(word);
+			this.wordAct.setSignature(signture);
+			this.wordAct.setHash(hash);
+			this.wordAct.setPoliticien(pk);
+			return this.wordAct;
 		} else {
 			return null;
 		}
@@ -183,6 +203,15 @@ public class Politician implements Runnable {
 		synchronized (MotorA.getMotorA()) {
 			MotorA motor = MotorA.getMotorA();
 			motor.addWord(w);
+			motor.showWordPool();
+		}
+
+	}
+	
+	protected void showWordPool() {
+		System.out.println("show word pool");
+		synchronized (MotorA.getMotorA()) {
+			MotorA motor = MotorA.getMotorA();
 			motor.showWordPool();
 		}
 

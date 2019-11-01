@@ -239,7 +239,7 @@ public class Politicien {
 				i++;
 			}*/
 			
-
+/*
 		} catch (IOException exception) {
 			exception.printStackTrace();
 			System.out.println("exception : " + exception.getMessage());
@@ -255,6 +255,6 @@ public class Politicien {
 				System.out.println("e : " + e.getMessage());
 			}
 		}
-	}*/
-
+	}
+*/
 }

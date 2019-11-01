@@ -25,7 +25,7 @@ public class Client implements Runnable {
 	private static String pk;
 	private static KeyPair kp;
 	private ArrayList<String> LetterBag = new ArrayList<String>();
-	private String hash = "";
+	private String hash = ""+Math.random()*100;
 	private char[] bags = { 'b', 'd', 'u', 'q', 's', 'y', 'o', 'r', 'r', 'p', 'm', 'e', 'p', 'y', 's', 'l', 't', 'h',
 			'u', 'i', 'n', 'p', 'w', 't', 'w', 'a', 'e', 's', 'r', 'c', 'y', 'c', 'u', 'j', 'x', 't', 'i', 'o', 'k',
 			'k', 'c', 'c', 'l', 'w', 'y', 'c', 'w', 'o', 'y', 'x', 'g', 'c', 'u', 'y', 'g', 's', 's', 'c', 'q', 'q',

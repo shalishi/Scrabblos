@@ -30,15 +30,20 @@ public class Politician implements Runnable {
 		try {
 			dictionary = Utils.makeDictionnary("src/dict_dict_100000_1_10.txt");
 			CreateKey();
+			wordAct = new Word(new ArrayList<Letter>(),"","","");
 			System.out.println("Thread Politician" + Thread.currentThread().getId() + " is running");
+			int i = 0;
 			while (true) {
-				Word word = make_word();
+				Word word = makeWord();
 				if (word != null) {
 					if(inDictionary()) {
 						updateWordPool(wordAct);
+						//break;
+						i++;
+						if(i==1)break;
 					}
 				}
-				readLetterPool();
+				//readLetterPool();
 			}
 
 		} catch (Exception e) {
@@ -100,14 +105,14 @@ public class Politician implements Runnable {
 	}
 
 	public ArrayList<String> findWordDestinaire() {
-		System.out.println(" po find   ----> wordAct = " + wordAct.getWord());
+		//System.out.println(" po find   ----> wordAct = " + wordAct.getWord());
 		ArrayList<Letter> letters = wordAct.getWord();
 		ArrayList<String> dest = new ArrayList<String>();
 		for (String s : dictionary) {
 			int i = 0;
-			System.out.print(s);
+			//System.out.print(s);
 			if (s.length() <= letters.size()) {
-				System.out.println(" --> too short!!!");
+				//System.out.println(" --> too short!!!");
 				continue;
 			} else {
 				for (Letter letter : letters) {
@@ -115,7 +120,7 @@ public class Politician implements Runnable {
 						i++;
 						continue;
 					} else {
-						System.out.println(" --> not match!!!");
+						//System.out.println(" --> not match!!!");
 						break;
 					}
 				}
@@ -126,7 +131,7 @@ public class Politician implements Runnable {
 		return dest;
 	}
 
-	protected Word make_word()
+	protected Word makeWord()
 			throws IOException, JSONException, InvalidKeyException, NoSuchAlgorithmException, SignatureException {
 		// dans cette class nous devons ecrire l'algo de creation d'un mot
 		ArrayList<Letter> lp = readLetterPool();
@@ -136,13 +141,13 @@ public class Politician implements Runnable {
 		String hash = "";
 		ArrayList<Letter> word = new ArrayList<Letter>();
 		boolean flag = false;
-
+		
 		if (wordAct.getWord().size() == 0) {
 			Letter l = lp.get((int) (Math.random() * (lp.size() - 1)));
 			word.add(l);
 			wordDes = findWordDestinaire();
 			flag = true;
-		} else {
+		} else {			
 			word = (ArrayList<Letter>) wordAct.getWord().clone();
 			int i = word.size();
 			for (String d : wordDes) {
@@ -158,6 +163,9 @@ public class Politician implements Runnable {
 				if (flag)break;
 			}
 		}
+		
+		
+		
 		if (flag) {
 			wordAct.setWord(word);
 			wordAct.setSignature(signture);
@@ -167,10 +175,10 @@ public class Politician implements Runnable {
 		} else {
 			return null;
 		}
+		
 	}
 
 	protected void updateWordPool(Word w) {
-
 		System.out.println("update word pool");
 		synchronized (MotorA.getMotorA()) {
 			MotorA motor = MotorA.getMotorA();

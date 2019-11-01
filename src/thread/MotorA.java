@@ -98,13 +98,13 @@ class MotorA {
 	public void showWordPool() {
 		lock.lock();
 		try {
-			System.out.println("show letter pool-------------------------------------------------");
+			System.out.println("show WORD pool-------------------------------------------------");
 			if (word_pool.size() > 0) {
 				for (Word w : word_pool) {
 					System.out.println(w.toString());
 				}
 			}
-			System.out.println("finish show letter pool------------------------------------------");
+			System.out.println("finish show WORD pool------------------------------------------");
 		} finally {
 			lock.unlock();
 		}

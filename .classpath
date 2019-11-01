@@ -8,10 +8,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="lib" path="lib/eddsa-0.3.0.jar"/>
 	<classpathentry kind="lib" path="lib/java-json.jar"/>
-	<classpathentry kind="lib" path="/home/fatemeh/Bureau/jar_files (1)/eddsa-0.3.0.jar"/>
-	<classpathentry kind="lib" path="/home/fatemeh/Bureau/jar_files (2)/simplejson-to-easyjson-2.0.5.jar"/>
-	<classpathentry kind="lib" path="/home/fatemeh/Bureau/jar_files (2)/easyjson-core-2.0.5.jar"/>
-	<classpathentry kind="lib" path="/home/fatemeh/Musique/jar_files (3)/gson-2.8.2.jar"/>
 	<classpathentry kind="lib" path="gson-2.8.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

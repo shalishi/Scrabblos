@@ -47,7 +47,8 @@ public class Client implements Runnable {
 
 			updateLetterPool();
 			
-			String sig = getWordSiganture();
+			String sig = getWordSignature();
+			System.out.println("getWordSignature is "+ sig);
 			/*
 			 * while(true) { TimeUnit.SECONDS.sleep(10); updateLetterPool(); }
 			 */
@@ -58,7 +59,7 @@ public class Client implements Runnable {
 
 	}
 
-	private String getWordSiganture() {
+	private String getWordSignature() {
 		ArrayList<Word> wordPool = readWordPool();
 		if (wordPool.size() > 0) {
 			int maxSize = 0;
@@ -151,7 +152,7 @@ public class Client implements Runnable {
 	protected void updateLetterPool() {
 
 		System.out.println("update letter pool");
-		Letter l = chooseLetter(LetterBag, getWordSiganture());
+		Letter l = chooseLetter(LetterBag, getWordSignature());
 		synchronized (MotorA.getMotorA()) {
 			MotorA motor = MotorA.getMotorA();
 			motor.addLetter(l);

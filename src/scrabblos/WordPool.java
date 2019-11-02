@@ -3,13 +3,13 @@ package scrabblos;
 import java.util.ArrayList;
 
 public class WordPool {
-	long current_period;
-	long next_period;
+	int current_period;
+	int last_period;
 	ArrayList<Word> words;
 	
-	public WordPool(long current_period, long next_period, ArrayList<Word> words) {
+	public WordPool(int current_period, int last_period, ArrayList<Word> words) {
 		this.current_period = current_period;
-		this.next_period = next_period;
+		this.last_period = last_period;
 		this.words = words;
 	}
 
@@ -17,16 +17,16 @@ public class WordPool {
 		return current_period;
 	}
 
-	public void setCurrent_period(long current_period) {
+	public void setCurrent_period(int current_period) {
 		this.current_period = current_period;
 	}
 
-	public long getNext_period() {
-		return next_period;
+	public long getLast_period() {
+		return last_period;
 	}
 
-	public void setNext_period(long next_period) {
-		this.next_period = next_period;
+	public void setNext_period(int last_period) {
+		this.last_period = last_period;
 	}
 
 	public ArrayList<Word> getWords() {
@@ -37,6 +37,15 @@ public class WordPool {
 		this.words = words;
 	}
 	
-	
+	public ArrayList<Word> getWordsByPeriod(int current_period) {
+		ArrayList<Word> wordc = new ArrayList<Word>();
+		for(Word w:words) {
+			if(words.getPeriod() == current_period) {
+				wordc.add(w);
+			}
+		}
+		return wordc;
+		
+	}
 	
 }

@@ -66,8 +66,8 @@ class MotorA {
     	//System.out.println("s :"+s +" b:"+ b);
 	        while (iter.hasNext()) {
 	            Map.Entry<String,Boolean> ele = (Map.Entry<String,Boolean>) iter.next();
-	            if (ele.getValue()==false) {
-	            	passNextRound=false;
+	            if (ele.getValue() == false) {
+	            	passNextRound= false;
 	            	//break;
 	            	
 	            }
@@ -84,6 +84,13 @@ class MotorA {
 		int cp = getLetter_pool().getCurrent_period();
 		letter_pool.setCurrent_period(++cp);
 		word_pool.setCurrent_period(++cp);
+		Iterator iter = politicians_states.entrySet().iterator();
+    	System.out.println("******************************************************change politicians states******************************************************");
+	        while (iter.hasNext()) {
+	            Map.Entry<String,Boolean> ele = (Map.Entry<String,Boolean>) iter.next();
+	            ele.setValue(false);
+	        }
+		
 		lock.unlock();
 	}
 	

@@ -46,6 +46,8 @@ public class Client implements Runnable {
 			}
 
 			updateLetterPool();
+			
+			String sig = getWordSiganture();
 			/*
 			 * while(true) { TimeUnit.SECONDS.sleep(10); updateLetterPool(); }
 			 */

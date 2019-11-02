@@ -2,13 +2,11 @@ package scrabblos;
 
 import java.util.ArrayList;
 
-import org.json.JSONArray;
 import org.json.JSONException;
-import org.json.JSONObject;
 
 public class Word {
 	private ArrayList<Letter> word;
-	private long period;
+	private int period;
 	private String head;
 	private String politicien;
 	private String signature;
@@ -19,11 +17,11 @@ public class Word {
 		this.politicien = politicien;
 		this.signature = signature;
 	}
-	public long getPeriod() {
+	public int getPeriod() {
 		return period;
 	}
 
-	public void setPeriod(long period) {
+	public void setPeriod(int period) {
 		this.period = period;
 	}
 	

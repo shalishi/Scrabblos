@@ -40,7 +40,7 @@ public class WordPool {
 	public ArrayList<Word> getWordsByPeriod(int current_period) {
 		ArrayList<Word> wordc = new ArrayList<Word>();
 		for(Word w:words) {
-			if(words.getPeriod() == current_period) {
+			if(w.getPeriod() == current_period) {
 				wordc.add(w);
 			}
 		}

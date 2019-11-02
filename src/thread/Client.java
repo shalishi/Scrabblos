@@ -39,6 +39,7 @@ public class Client implements Runnable {
 			// Displaying the thread that is running
 			System.out.println("Thread Client" + Thread.currentThread().getId() + " is running");
 			creatKey();
+			rigister(pk);
 			for (char c : bags) {
 				LetterBag.add(c + "");
 			}
@@ -48,19 +49,19 @@ public class Client implements Runnable {
 				// TimeUnit.SECONDS.sleep(10);
 				LetterPool letterpool = getLetterPool();
 				//whether in the letterpool already have letter of this period of this author
-				if (letterpool.getLetters().size() != 0) {
+				/*if (letterpool.getLetters().size() != 0) {
 					for (Letter l : letterpool.getLetters()) {
 						if (l.getAuthor() == pk && l.getPeriod() == current_period) {
 							System.out.println("already rejeted letter");
 							current_period++;
 						}
 					}
-				}
-				if (current_period <= getLetterPool().getCurrent_period()) {
+				}*/
+				if (!getState(pk)) {
 					System.out.println("Thread Client" + Thread.currentThread().getId() + " throw letter in round "
 							+ getLetterPool().getCurrent_period());
 					updateLetterPool();
-					//current_period++;
+					updateState(pk, true);
 					// current_period=getLetterPool().getCurrent_period();
 				}
 			}
@@ -72,6 +73,28 @@ public class Client implements Runnable {
 
 	}
 
+	
+	private void rigister(String public_key) {
+		synchronized (MotorA.getMotorA()) {
+			MotorA motor = MotorA.getMotorA();
+			motor.registerClient(public_key);
+		}
+	}
+	
+	private void updateState(String public_key,boolean state) {
+		synchronized (MotorA.getMotorA()) {
+			MotorA motor = MotorA.getMotorA();
+			motor.updateClientState(public_key,state);
+		}
+	}
+	
+	private boolean getState(String public_key) {
+		synchronized (MotorA.getMotorA()) {
+			MotorA motor = MotorA.getMotorA();
+			return motor.getClients_states().get(public_key);
+		}
+	}
+	
 	protected int getPeriod() {
 		synchronized (MotorA.getMotorA()) {
 			MotorA motor = MotorA.getMotorA();

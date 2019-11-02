@@ -1,6 +1,9 @@
 package thread;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 import java.util.concurrent.locks.Lock;
 
 import scrabblos.Letter;
@@ -12,14 +15,90 @@ class MotorA {
 
 	private static MotorA motor = new MotorA();
 	private static boolean ROUND_FINISH_FLAG = false;
-	static int TIME_UNIT_PER_ROUND = 2*1;
+	static int TIME_UNIT_PER_ROUND = 1;
 	static int MAX_ROUND = 10;
 	static int CLIENT_QTY = 12;
-	static int POLITTICIAN_QTY = 12;
+	static int POLITTICIAN_QTY = 5;
 	private static LetterPool letter_pool = new LetterPool(0,1,new ArrayList<Letter>());
 	private static WordPool word_pool = new WordPool(0,1,new ArrayList<Word> ());
 	private static final java.util.concurrent.locks.Lock lock = new java.util.concurrent.locks.ReentrantLock();
+	private static Map<String,Boolean> clients_states = new HashMap<String,Boolean>();
+	private static Map<String,Boolean> politicians_states = new HashMap<String,Boolean>();
+	
+	public static Map<String, Boolean> getClients_states() {
+		lock.lock();
+		Map<String,Boolean> cs = clients_states;
+		lock.unlock();
+		return cs;
+	}
 
+	public static void setClients_states(Map<String, Boolean> clients_states) {
+		lock.lock();
+		MotorA.clients_states = clients_states;
+		lock.unlock();
+	}
+
+	public static Map<String, Boolean> getPoliticians_states() {
+		lock.lock();
+		Map<String,Boolean> ps = politicians_states;
+		lock.unlock();
+		return ps;
+	}
+	
+	public static void registerPolitician(String s) {
+		lock.lock();
+		politicians_states.put(s, false);
+		lock.unlock();
+	}
+	
+	public static void registerClient(String s) {
+		lock.lock();
+		clients_states.put(s, false);
+		lock.unlock();
+	}
+	
+	public static void updatePoliticianState(String s,boolean b) {
+		lock.lock();
+		politicians_states.put(s,b);
+		Iterator iter = politicians_states.entrySet().iterator();
+		Boolean passNextRound = true;
+    	//System.out.println("******************************************************politician states******************************************************");
+    	//System.out.println("s :"+s +" b:"+ b);
+	        while (iter.hasNext()) {
+	            Map.Entry<String,Boolean> ele = (Map.Entry<String,Boolean>) iter.next();
+	            if (ele.getValue()==false) {
+	            	passNextRound=false;
+	            	//break;
+	            	
+	            }
+	            //System.out.println(ele.getValue() + ": " +ele.getKey());
+	        }
+	    if(passNextRound)passNextRound();
+		lock.unlock();
+	}
+	
+
+	public static void passNextRound() {
+		lock.lock();
+		System.out.println("******************************************************pass to next round******************************************************");
+		int cp = getLetter_pool().getCurrent_period();
+		letter_pool.setCurrent_period(++cp);
+		word_pool.setCurrent_period(++cp);
+		lock.unlock();
+	}
+	
+	public static void updateClientState(String s,boolean b) {
+		lock.lock();
+		clients_states.put(s, b);
+		lock.unlock();
+	}
+
+	public static void setPoliticians_states(Map<String, Boolean> politicians_states) {
+		lock.lock();
+		MotorA.politicians_states = politicians_states;
+		lock.unlock();
+	}
+	
 	public static boolean getROUND_FINISH_FLAG() {
 		lock.lock();
 		boolean f = ROUND_FINISH_FLAG;
@@ -110,6 +189,22 @@ class MotorA {
 				}
 			}
 			System.out.println("finish show WORD pool------------------------------------------");
+		} finally {
+			lock.unlock();
+		}
+
+	}
+	
+	public void showPoliticiansState() {
+		lock.lock();
+		try {
+			Iterator iter = politicians_states.entrySet().iterator();
+	    	System.out.println("******************************************************politician states******************************************************");
+		        while (iter.hasNext()) {
+		            Map.Entry<String,Boolean> ele = (Map.Entry<String,Boolean>) iter.next();
+		            System.out.println(ele.getValue() + ": " +ele.getKey());
+		        }
+		    	System.out.println("******************************************************finish politician states******************************************************");
 		} finally {
 			lock.unlock();
 		}

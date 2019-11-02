@@ -8,6 +8,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 
 import org.json.JSONException;
 
@@ -31,19 +32,21 @@ public class Politician implements Runnable {
 	public void run() {
 		try {
 			dictionary = Utils.makeDictionnary("src/dict_dict_100000_1_10.txt");
-			CreateKey();
+			createKey();
+			rigister(pk);
+			TimeUnit.MILLISECONDS.sleep(10);
 			//System.out.println("Thread Politician" + Thread.currentThread().getId()+ pk + " is running");
 			
 			while (readLetterPool().getCurrent_period() <= MotorA.MAX_ROUND) {				
-				System.out.println("++++++++++++++++++++++++++++++++Round : "+readLetterPool().getCurrent_period()+"+++++++++++++++++++++++++++++++++++++++");
+				//System.out.println("++++++++++++++++++++++++++++++++Round : "+readLetterPool().getCurrent_period()+"+++++++++++++++++++++++++++++++++++++++");
 				wordAct = new Word(new ArrayList<Letter>(),"","","");
 				wordDes = new ArrayList<String>();
 				long startTime = System.currentTimeMillis();
-				while ((System.currentTimeMillis()-startTime)< MotorA.TIME_UNIT_PER_ROUND*MILI_PER_SEC){
+				while (!getState(pk)&&(System.currentTimeMillis()-startTime)< MotorA.TIME_UNIT_PER_ROUND*MILI_PER_SEC){
 					Word word = makeWord();
 					//System.out.println("here " +readLetterPool().getCurrent_period());
 					if (word != null) {
-						System.out.println("here " +readLetterPool().getCurrent_period());
+						//System.out.println("here " +readLetterPool().getCurrent_period());
 						if(!inWordPool(word)) {
 							if(inDictionary(word)) {
 								updateWordPool(word);
@@ -51,16 +54,17 @@ public class Politician implements Runnable {
 						}
 					}
 				}
-				passNextRound();
+				//System.out.println("here update state politician");
+				updateState(pk, true);
+				
 			}
 			showWordPool();
 			
 
 		} catch (Exception e) {
 			// Throwing an exception
-			e.printStackTrace();
-			System.out.println("Exception is caught : " + e.toString() + e.getCause().getMessage());
-		}
+			System.out.println("get state of :"+pk);
+			e.printStackTrace();		}
 
 	}
 	
@@ -73,6 +77,29 @@ public class Politician implements Runnable {
 		}
 		
 	}
+	
+	private void rigister(String public_key) {
+		synchronized (MotorA.getMotorA()) {
+			MotorA motor = MotorA.getMotorA();
+			motor.registerPolitician(public_key);
+		}
+	}
+	
+	private void updateState(String public_key,boolean state) {
+		synchronized (MotorA.getMotorA()) {
+			MotorA motor = MotorA.getMotorA();
+			motor.updatePoliticianState(pk,state);
+		}
+	}
+	
+	private boolean getState(String public_key) {
+		
+		synchronized (MotorA.getMotorA()) {
+			MotorA motor = MotorA.getMotorA();
+			return motor.getPoliticians_states().get(pk);
+		}
+	}
+	
 	private boolean inWordPool(Word word) {
 		synchronized (MotorA.getMotorA()) {
 			MotorA motor = MotorA.getMotorA();
@@ -111,7 +138,7 @@ public class Politician implements Runnable {
       return true;
 	}
 
-	private void CreateKey() {
+	private void createKey() {
 		ED25519 ed;
 		try {
 			ed = new ED25519();
@@ -232,6 +259,7 @@ public class Politician implements Runnable {
 			MotorA motor = MotorA.getMotorA();
 			motor.addWord(w);
 			motor.showWordPool();
+			motor.showPoliticiansState();
 		}
 
 	}

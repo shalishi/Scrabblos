@@ -20,6 +20,7 @@ import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import scrabblos.ED25519;
 import scrabblos.Letter;
 import scrabblos.Utils;
+import scrabblos.Word;
 
 public class Client implements Runnable {
 	private static String pk;
@@ -48,6 +49,7 @@ public class Client implements Runnable {
 			for(char c:bags) {
 				LetterBag.add(c+"");
 			}
+			
 
 			updateLetterPool();
 			/*
@@ -60,6 +62,33 @@ public class Client implements Runnable {
 
 	}
 
+	private String getWordSiganture() {
+		ArrayList<Word> wordPool = readWordPool();
+		if(wordPool.size()>0) {
+			int maxSize = 0;
+			int maxSizeIndex=0;
+			for(Word w : wordPool) {
+				if(w.getWord().size()>maxSize) {
+					maxSize = w.getWord().size();
+					maxSizeIndex = wordPool.indexOf(w);
+				}
+			}
+			return wordPool.get(maxSizeIndex).getSignature();		
+		}
+		return "";
+	}
+	
+	private ArrayList<Word> readWordPool() {
+		System.out.println("Thread Client " + Thread.currentThread().getId() + " is reading word pool*********************************************");
+		synchronized (MotorA.getMotorA()) {
+
+			MotorA motor = MotorA.getMotorA();
+			System.out
+					.println("Thread Client " + Thread.currentThread().getId() + " is finished of reading word pool**********************************");
+			return motor.getWord_pool().getWords();
+		}
+	}
+	
 	private void creatKey() {
 		// CREATION DE LA CLE PUBLIQUE
 		ED25519 ed;
@@ -74,7 +103,7 @@ public class Client implements Runnable {
 		}
 	}
 
-	private Letter choose_Letter(ArrayList<String> LetterBag, String hash) {
+	private Letter chooseLetter(ArrayList<String> LetterBag, String hash) {
 		MessageDigest digest;
 		try {
 			digest = MessageDigest.getInstance("SHA-256");
@@ -94,10 +123,8 @@ public class Client implements Runnable {
 	protected void updateLetterPool() {
 		
 			System.out.println("update letter pool");
-			Letter l = choose_Letter(LetterBag, hash);
-
+			Letter l = chooseLetter(LetterBag, getWordSiganture());
 			//String j = "{ \"inject_letter\": { \"letter\":\"a\", \"period\":0, \"head\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"author\":\"b7b597e0d64accdb6d8271328c75ad301c29829619f4865d31cc0c550046a08f\", \"signature\":\"8b6547447108e11c0092c95e460d70f367bc137d5f89c626642e1e5f2ce\" }}";
-
 			synchronized (MotorA.getMotorA()) {
 				MotorA motor = MotorA.getMotorA();
 				motor.addLetter(l);

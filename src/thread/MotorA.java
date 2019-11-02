@@ -4,14 +4,16 @@ import java.util.ArrayList;
 import java.util.concurrent.locks.Lock;
 
 import scrabblos.Letter;
+import scrabblos.LetterPool;
 import scrabblos.Word;
+import scrabblos.WordPool;
 
 class MotorA {
 
 	private static MotorA motor = new MotorA();
 	private static boolean flag = true;
-	private static ArrayList<Letter> letter_pool = new ArrayList<Letter>();
-	private static ArrayList<Word> word_pool = new ArrayList<Word>();
+	private static LetterPool letter_pool = new LetterPool(0,1,new ArrayList<Letter>());
+	private static WordPool word_pool = new WordPool(0,1,new ArrayList<Word> ());
 	private static final java.util.concurrent.locks.Lock lock = new java.util.concurrent.locks.ReentrantLock();
 
 	public static boolean isFlag() {
@@ -28,27 +30,27 @@ class MotorA {
 
 	}
 
-	public static ArrayList<Letter> getLetter_pool() {
+	public static LetterPool getLetter_pool() {
 		lock.lock();
-		ArrayList<Letter> lp = letter_pool;
+		LetterPool lp = letter_pool;
 		lock.unlock();
 		return lp;
 	}
 
-	public static void setLetter_pool(ArrayList<Letter> letter_pool) {
+	public static void setLetter_pool(LetterPool letter_pool) {
 		lock.lock();
 		MotorA.letter_pool = letter_pool;
 		lock.unlock();
 	}
 
-	public static ArrayList<Word> getWord_pool() {
+	public static WordPool getWord_pool() {
 		lock.lock();
-		ArrayList<Word> wp = word_pool;
+		WordPool wp = word_pool;
 		lock.unlock();
 		return wp;
 	}
 
-	public static void setWord_pool(ArrayList<Word> word_pool) {
+	public static void setWord_pool(WordPool word_pool) {
 		lock.lock();
 		MotorA.word_pool = word_pool;
 		lock.unlock();
@@ -67,7 +69,7 @@ class MotorA {
 
 	public static void addLetter(Letter s) {
 		lock.lock();
-		letter_pool.add(s);
+		letter_pool.getLetters().add(s);
 		lock.unlock();
 	}
 
@@ -75,8 +77,8 @@ class MotorA {
 		lock.lock();
 		try {
 			System.out.println("show letter pool-------------------------------------------------");
-			if (letter_pool.size() > 0) {
-				for (Letter s : letter_pool) {
+			if (letter_pool.getLetters().size() > 0) {
+				for (Letter s : letter_pool.getLetters()) {
 					System.out.println(s.toString());
 				}
 			}
@@ -86,11 +88,10 @@ class MotorA {
 		}
 
 	}
-	/* here go business methods for MotorA */
 
 	public void addWord(Word w) {
 		lock.lock();
-		word_pool.add(w);
+		word_pool.getWords().add(w);
 		lock.unlock();
 
 	}
@@ -99,8 +100,8 @@ class MotorA {
 		lock.lock();
 		try {
 			System.out.println("show WORD pool-------------------------------------------------");
-			if (word_pool.size() > 0) {
-				for (Word w : word_pool) {
+			if (word_pool.getWords().size() > 0) {
+				for (Word w : word_pool.getWords()) {
 					System.out.println(w.toString());
 				}
 			}
@@ -111,6 +112,7 @@ class MotorA {
 
 	}
 
+	/*
 	public void jugement() {
 		lock.lock();
 		ArrayList<Word> wordpool = getWord_pool();
@@ -134,5 +136,6 @@ class MotorA {
 		
 		lock.unlock();
 	}
+	*/
 
 }

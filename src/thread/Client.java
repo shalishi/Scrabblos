@@ -9,8 +9,6 @@ import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.concurrent.TimeUnit;
-
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import scrabblos.ED25519;
 import scrabblos.Letter;
@@ -23,6 +21,7 @@ public class Client implements Runnable {
 	private static KeyPair kp;
 	private ArrayList<String> LetterBag = new ArrayList<String>();
 	private String hash = "" + Math.random() * 100;
+	private int current_period = 0;//start at 0 round
 	private char[] bags = { 'b', 'd', 'u', 'q', 's', 'y', 'o', 'r', 'r', 'p', 'm', 'e', 'p', 'y', 's', 'l', 't', 'h',
 			'u', 'i', 'n', 'p', 'w', 't', 'w', 'a', 'e', 's', 'r', 'c', 'y', 'c', 'u', 'j', 'x', 't', 'i', 'o', 'k',
 			'k', 'c', 'c', 'l', 'w', 'y', 'c', 'w', 'o', 'y', 'x', 'g', 'c', 'u', 'y', 'g', 's', 's', 'c', 'q', 'q',
@@ -34,7 +33,7 @@ public class Client implements Runnable {
 			'j', 'w', 'p', 'y', 'x', 'b', 't', 'v', 'v', 'g', 'a', 'y', 'q', 'm', 'k', 'm', 'x', 'c', 't', 'u', 'n',
 			'g', 'e', 'o', 'w', 'o', 'l', 'l', 'f', 'o', 'd', 'l', 'b', 'p', 'x' };
 
-	@Override 
+	@Override
 	public void run() {
 		try {
 			// Displaying the thread that is running
@@ -43,22 +42,47 @@ public class Client implements Runnable {
 			for (char c : bags) {
 				LetterBag.add(c + "");
 			}
-			int current_period=-1;
 			while (getLetterPool().getCurrent_period() <= MotorA.MAX_ROUND) {
-				//System.out.println("client current_period ="+current_period+" current_period = "+getLetterPool().getCurrent_period());
-		    	//TimeUnit.SECONDS.sleep(10);
-			    	if(current_period!=getLetterPool().getCurrent_period()) {
-			    		System.out.println("Thread Client" + Thread.currentThread().getId() + " throw letter in round "+getLetterPool().getCurrent_period());
-			    		updateLetterPool();	
-			    		current_period=getLetterPool().getCurrent_period();
-			    	}
-		    	}
-			
+				// System.out.println("client current_period ="+current_period+" current_period
+				// = "+getLetterPool().getCurrent_period());
+				// TimeUnit.SECONDS.sleep(10);
+				LetterPool letterpool = getLetterPool();
+				//whether in the letterpool already have letter of this period of this author
+				if (letterpool.getLetters().size() != 0) {
+					for (Letter l : letterpool.getLetters()) {
+						if (l.getAuthor() == pk && l.getPeriod() == current_period) {
+							System.out.println("already rejeted letter");
+							current_period++;
+						}
+					}
+				}
+				if (current_period <= getLetterPool().getCurrent_period()) {
+					System.out.println("Thread Client" + Thread.currentThread().getId() + " throw letter in round "
+							+ getLetterPool().getCurrent_period());
+					updateLetterPool();
+					//current_period++;
+					// current_period=getLetterPool().getCurrent_period();
+				}
+			}
+
 		} catch (Exception e) {
 			// Throwing an exception
 			System.out.println("Exception is caught");
 		}
 
+	}
+
+	protected int getPeriod() {
+		synchronized (MotorA.getMotorA()) {
+			MotorA motor = MotorA.getMotorA();
+			LetterPool letterpool = motor.getLetter_pool();
+			int periode = 0;
+			for (Letter letter : letterpool.getLetters()) {
+				if (letter.getPeriod() > periode)
+					periode = letter.getPeriod();
+			}
+			return periode;
+		}
 	}
 
 	private String getWordSignature() {
@@ -91,11 +115,11 @@ public class Client implements Runnable {
 					int size = w.getWord().size();
 					if (w.getPeriod() > 0) {
 						hash = w.getHash();
-						System.out.println("size  = " +size);
+						System.out.println("size  = " + size);
 						return size + getPreSize(hash);
 					}
 					if (w.getPeriod() == 0) {
-						System.out.println("size  = " +size);
+						System.out.println("size  = " + size);
 						return size;
 					}
 				}
@@ -142,8 +166,8 @@ public class Client implements Runnable {
 			String letter = LetterBag.get(0);
 			String signature = Utils.bytesToHex(Utils.signature2(letter, digest.digest((hash).getBytes()), 0, kp));
 			String head = Utils.bytesToHex(digest.digest((hash).getBytes()));
-			int period = getLetterPool().getCurrent_period();
-			return new Letter(letter, period, head, pk, signature);
+			//int period = getLetterPool().getCurrent_period(); 
+			return new Letter(letter, current_period++, head, pk, signature);
 		} catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException | IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -170,7 +194,7 @@ public class Client implements Runnable {
 		}
 
 	}
-	
+
 	private boolean isThisRoundFinish() {
 
 		synchronized (MotorA.getMotorA()) {
@@ -179,6 +203,5 @@ public class Client implements Runnable {
 		}
 
 	}
-
 
 }

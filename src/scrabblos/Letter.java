@@ -2,12 +2,12 @@ package scrabblos;
 
 public class Letter {
 	private String letter;
-	private long period;
+	private int period;
 	private String head;
 	private String author;
 	private String signature;
 	
-	public Letter(String letter, long period, String hash, String author, String signature) {
+	public Letter(String letter, int period, String hash, String author, String signature) {
 		super();
 		this.letter = letter;
 		this.period = period;
@@ -22,7 +22,7 @@ public class Letter {
 	public void setLetter(String letter) {
 		this.letter = letter;
 	}
-	public long getPeriod() {
+	public int getPeriod() {
 		return period;
 	}
 	public void setPeriod(int period) {

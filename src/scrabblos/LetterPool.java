@@ -3,17 +3,17 @@ package scrabblos;
 import java.util.ArrayList;
 
 public class LetterPool {
-	private long current_period;
-	private long next_period;
+	private int current_period;
+	private int next_period;
 	private ArrayList<Letter> letters;
 	
-	public LetterPool(long current_period, long next_period, ArrayList<Letter> letters) {
+	public LetterPool(int current_period, int next_period, ArrayList<Letter> letters) {
 		this.current_period = current_period;
 		this.next_period = next_period;
 		this.letters = letters;
 	}
 	
-	public long getCurrent_period() {
+	public int getCurrent_period() {
 		return current_period;
 	}
 
@@ -21,7 +21,7 @@ public class LetterPool {
 		this.current_period = current_period;
 	}
 
-	public long getNext_period() {
+	public int getNext_period() {
 		return next_period;
 	}
 

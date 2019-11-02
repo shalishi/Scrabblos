@@ -1,20 +1,20 @@
 package scrabblos;
 
 public class DiffWordPool {
-	long since;
+	int since;
 	WordPool wordpool;
 	
-	public DiffWordPool(long since, WordPool wordpool) {
+	public DiffWordPool(int since, WordPool wordpool) {
 		super();
 		this.since = since;
 		this.wordpool = wordpool;
 	}
 
-	public long getSince() {
+	public int getSince() {
 		return since;
 	}
 
-	public void setSince(long since) {
+	public void setSince(int since) {
 		this.since = since;
 	}
 

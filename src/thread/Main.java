@@ -8,9 +8,8 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
 public class Main {
 
 	public static void main(String args[]) {
-		int n = 18; // Number of clients 
-		ArrayList<Thread> clients = new ArrayList<Thread>();
-        for (int i=0; i<n; i++) 
+
+        for (int i=0; i<MotorA.CLIENT_QTY; i++) 
         { 
         	try {
 				TimeUnit.MILLISECONDS.sleep(10);
@@ -18,13 +17,11 @@ public class Main {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} 
-            Thread object = new Thread(new Client()); 
-            clients.add(object);
+            Thread object = new Thread(new Client());        
             object.start(); 
         }         
     	
-        int m =3; // Number of politicians 
-        for (int i=0; i<m; i++) 
+        for (int i=0; i<MotorA.POLITTICIAN_QTY; i++) 
         { 
 
         	try {

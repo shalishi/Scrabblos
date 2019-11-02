@@ -32,23 +32,26 @@ public class Politician implements Runnable {
 		try {
 			dictionary = Utils.makeDictionnary("src/dict_dict_100000_1_10.txt");
 			CreateKey();
-			MessageDigest digest = MessageDigest.getInstance("SHA-256");
-			String head = Utils.bytesToHex(digest.digest((hash).getBytes()));
-			wordAct = new Word(new ArrayList<Letter>(),head,"","");
-			System.out.println("Thread Politician" + Thread.currentThread().getId()+ pk + " is running");
+			//System.out.println("Thread Politician" + Thread.currentThread().getId()+ pk + " is running");
 			
-
-			long startTime = System.currentTimeMillis();
-			while ((System.currentTimeMillis()-startTime)< 2*1000*MILI_PER_SEC){
-				Word word = makeWord();
-				if (word != null) {
-					if(!inWordPool(word)) {
-						if(inDictionary(word)) {
-							updateWordPool(word);
+			while (readLetterPool().getCurrent_period() <= MotorA.MAX_ROUND) {				
+				System.out.println("++++++++++++++++++++++++++++++++Round : "+readLetterPool().getCurrent_period()+"+++++++++++++++++++++++++++++++++++++++");
+				wordAct = new Word(new ArrayList<Letter>(),"","","");
+				wordDes = new ArrayList<String>();
+				long startTime = System.currentTimeMillis();
+				while ((System.currentTimeMillis()-startTime)< MotorA.TIME_UNIT_PER_ROUND*MILI_PER_SEC){
+					Word word = makeWord();
+					//System.out.println("here " +readLetterPool().getCurrent_period());
+					if (word != null) {
+						System.out.println("here " +readLetterPool().getCurrent_period());
+						if(!inWordPool(word)) {
+							if(inDictionary(word)) {
+								updateWordPool(word);
+							}
 						}
 					}
 				}
-				//System.out.println("Thread Politician" + Thread.currentThread().getId()+ pk + " is running");
+				passNextRound();
 			}
 			showWordPool();
 			
@@ -61,6 +64,15 @@ public class Politician implements Runnable {
 
 	}
 	
+	private void passNextRound() {
+		synchronized (MotorA.getMotorA()) {
+			MotorA motor = MotorA.getMotorA();
+			int cp = motor.getLetter_pool().getCurrent_period();
+			motor.getLetter_pool().setCurrent_period(++cp);
+			motor.getWord_pool().setCurrent_period(++cp);
+		}
+		
+	}
 	private boolean inWordPool(Word word) {
 		synchronized (MotorA.getMotorA()) {
 			MotorA motor = MotorA.getMotorA();
@@ -166,7 +178,7 @@ public class Politician implements Runnable {
 			throws IOException, JSONException, InvalidKeyException, NoSuchAlgorithmException, SignatureException {
 		// dans cette class nous devons ecrire l'algo de creation d'un mot
 		LetterPool letterPool = readLetterPool();
-		ArrayList<Letter> lp =letterPool.getLetters();
+		ArrayList<Letter> lp =letterPool.getCurrentLetters();
 		if(lp.isEmpty()) return null;
 	
 		ArrayList<Letter> word = new ArrayList<Letter>();

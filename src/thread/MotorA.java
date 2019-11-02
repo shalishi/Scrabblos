@@ -11,21 +11,25 @@ import scrabblos.WordPool;
 class MotorA {
 
 	private static MotorA motor = new MotorA();
-	private static boolean flag = true;
+	private static boolean ROUND_FINISH_FLAG = false;
+	static int TIME_UNIT_PER_ROUND = 2*1;
+	static int MAX_ROUND = 10;
+	static int CLIENT_QTY = 12;
+	static int POLITTICIAN_QTY = 12;
 	private static LetterPool letter_pool = new LetterPool(0,1,new ArrayList<Letter>());
 	private static WordPool word_pool = new WordPool(0,1,new ArrayList<Word> ());
 	private static final java.util.concurrent.locks.Lock lock = new java.util.concurrent.locks.ReentrantLock();
 
-	public static boolean isFlag() {
+	public static boolean getROUND_FINISH_FLAG() {
 		lock.lock();
-		boolean f = flag;
+		boolean f = ROUND_FINISH_FLAG;
 		lock.unlock();
 		return f;
 	}
 
-	public static void setFlag(boolean flag) {
+	public static void setROUND_FINISH_FLAG(boolean flag) {
 		lock.lock();
-		MotorA.flag = flag;
+		MotorA.ROUND_FINISH_FLAG = flag;
 		lock.unlock();
 
 	}

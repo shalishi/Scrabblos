@@ -32,6 +32,16 @@ public class LetterPool {
 	public ArrayList<Letter> getLetters() {
 		return letters;
 	}
+	
+	public ArrayList<Letter> getCurrentLetters() {
+		ArrayList<Letter> res = new ArrayList<Letter>();
+		for(Letter l : letters) {
+			if(l.getPeriod()==this.current_period) {
+				res.add(l);
+			}
+		}
+		return res;
+	}
 
 	public void setLetters(ArrayList<Letter> letters) {
 		this.letters = letters;

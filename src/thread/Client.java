@@ -9,6 +9,7 @@ import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.concurrent.TimeUnit;
 
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import scrabblos.ED25519;
@@ -33,25 +34,26 @@ public class Client implements Runnable {
 			'j', 'w', 'p', 'y', 'x', 'b', 't', 'v', 'v', 'g', 'a', 'y', 'q', 'm', 'k', 'm', 'x', 'c', 't', 'u', 'n',
 			'g', 'e', 'o', 'w', 'o', 'l', 'l', 'f', 'o', 'd', 'l', 'b', 'p', 'x' };
 
-	@Override
+	@Override 
 	public void run() {
 		try {
 			// Displaying the thread that is running
 			System.out.println("Thread Client" + Thread.currentThread().getId() + " is running");
 			creatKey();
-			// LetterBag = new ArrayList<String>();
-
 			for (char c : bags) {
 				LetterBag.add(c + "");
 			}
-
-			updateLetterPool();
+			int current_period=-1;
+			while (getLetterPool().getCurrent_period() <= MotorA.MAX_ROUND) {
+				//System.out.println("client current_period ="+current_period+" current_period = "+getLetterPool().getCurrent_period());
+		    	//TimeUnit.SECONDS.sleep(10);
+			    	if(current_period!=getLetterPool().getCurrent_period()) {
+			    		System.out.println("Thread Client" + Thread.currentThread().getId() + " throw letter in round "+getLetterPool().getCurrent_period());
+			    		updateLetterPool();	
+			    		current_period=getLetterPool().getCurrent_period();
+			    	}
+		    	}
 			
-			String sig = getWordSignature();
-			System.out.println("getWordSignature is "+ sig);
-			/*
-			 * while(true) { TimeUnit.SECONDS.sleep(10); updateLetterPool(); }
-			 */
 		} catch (Exception e) {
 			// Throwing an exception
 			System.out.println("Exception is caught");
@@ -168,5 +170,15 @@ public class Client implements Runnable {
 		}
 
 	}
+	
+	private boolean isThisRoundFinish() {
+
+		synchronized (MotorA.getMotorA()) {
+			MotorA motor = MotorA.getMotorA();
+			return motor.getROUND_FINISH_FLAG();
+		}
+
+	}
+
 
 }

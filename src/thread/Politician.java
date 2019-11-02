@@ -25,7 +25,7 @@ public class Politician implements Runnable {
 	private ArrayList<String> wordDes;
 	private String hash = "";
 	ArrayList<String> dictionary;
-
+	final int MILI_PER_SEC = 1000;
 	@Override
 	public void run() {
 		try {
@@ -35,19 +35,19 @@ public class Politician implements Runnable {
 			String head = Utils.bytesToHex(digest.digest((hash).getBytes()));
 			wordAct = new Word(new ArrayList<Letter>(),head,"","");
 			System.out.println("Thread Politician" + Thread.currentThread().getId()+ pk + " is running");
-			final long NANOSEC_PER_SEC = 1000l*1000*1000;
+			
 
-			long startTime = System.nanoTime();
-			while ((System.nanoTime()-startTime)< 1*2*NANOSEC_PER_SEC){
+			long startTime = System.currentTimeMillis();
+			while ((System.currentTimeMillis()-startTime)< 2*1000*MILI_PER_SEC){
 				Word word = makeWord();
 				if (word != null) {
-					//if(!inWordPool(word)) {
+					if(!inWordPool(word)) {
 						if(inDictionary(word)) {
 							updateWordPool(word);
-							//break;
 						}
-					//}
+					}
 				}
+				//System.out.println("Thread Politician" + Thread.currentThread().getId()+ pk + " is running");
 			}
 			showWordPool();
 			
@@ -173,7 +173,7 @@ public class Politician implements Runnable {
 			Letter l = lp.get((int) (Math.random() * (lp.size() - 1)));
 			word.add(l);
 			wordDes = findWordDestinaire(word);
-			showWordDes();
+			//showWordDes();
 			flag = true;
 		} else {			
 			word = (ArrayList<Letter>) this.wordAct.getWord().clone();
@@ -182,8 +182,7 @@ public class Politician implements Runnable {
 				for (Letter l : lp) {
 					if(d.length()<=i)continue;
 					if (l.getLetter().charAt(0) == d.charAt(i)) {
-						Letter newL = l;
-						if(isValid(newL)) {
+						if(isValid(l)) {
 							word.add(l);
 							wordDes = findWordDestinaire(word);
 							flag = true;

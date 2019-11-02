@@ -28,7 +28,7 @@ public class Main {
         { 
 
         	try {
-				TimeUnit.MILLISECONDS.sleep(10);
+        		TimeUnit.MILLISECONDS.sleep(100);
 			} catch (InterruptedException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();

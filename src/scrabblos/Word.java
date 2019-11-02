@@ -8,6 +8,7 @@ import org.json.JSONObject;
 
 public class Word {
 	private ArrayList<Letter> word;
+	private long period;
 	private String head;
 	private String politicien;
 	private String signature;
@@ -17,6 +18,13 @@ public class Word {
 		this.head = hash;
 		this.politicien = politicien;
 		this.signature = signature;
+	}
+	public long getPeriod() {
+		return period;
+	}
+
+	public void setPeriod(long period) {
+		this.period = period;
 	}
 	
 	public ArrayList<Letter> getWord() {

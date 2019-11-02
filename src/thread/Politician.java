@@ -14,6 +14,7 @@ import org.json.JSONException;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import scrabblos.ED25519;
 import scrabblos.Letter;
+import scrabblos.LetterPool;
 import scrabblos.Utils;
 import scrabblos.Word;
 
@@ -114,14 +115,14 @@ public class Politician implements Runnable {
 		}
 	}
 
-	protected ArrayList<Letter> readLetterPool() {
+	protected LetterPool readLetterPool() {
 		//System.out.println("Thread Politician is reading letter pool*********************************************");
 		synchronized (MotorA.getMotorA()) {
 
 			MotorA motor = MotorA.getMotorA();
 			//motor.showLetterPool();
 			//System.out.println("Thread Politician is finished of reading letter pool**********************************");
-			return motor.getLetter_pool().getLetters();
+			return motor.getLetter_pool();
 		}
 	}
 
@@ -164,7 +165,8 @@ public class Politician implements Runnable {
 	protected Word makeWord()
 			throws IOException, JSONException, InvalidKeyException, NoSuchAlgorithmException, SignatureException {
 		// dans cette class nous devons ecrire l'algo de creation d'un mot
-		ArrayList<Letter> lp = readLetterPool();
+		LetterPool letterPool = readLetterPool();
+		ArrayList<Letter> lp =letterPool.getLetters();
 		if(lp.isEmpty()) return null;
 	
 		ArrayList<Letter> word = new ArrayList<Letter>();
@@ -201,6 +203,7 @@ public class Politician implements Runnable {
 			String signture = Utils.bytesToHex(Utils.signature2Poli(word, digest.digest((hash).getBytes()), kp));
 			String head = Utils.bytesToHex(digest.digest((hash).getBytes()));
 			this.wordAct.setWord(word);
+			this.wordAct.setPeriod(letterPool.getCurrent_period());
 			this.wordAct.setSignature(signture);
 			this.wordAct.setHash(head);
 			this.wordAct.setPoliticien(pk);

@@ -292,7 +292,7 @@ class MotorA {
 				}
 			}
 			String winner = currentWords.get(maxSizeIndex).getSignature();
-			//ZSystem.out.println("Max Block is "+winner + ", max Size is "+ maxSize);
+			System.out.println("Max Block is "+winner + ", max Size is "+ maxSize);
 			String blockchaine= "" ;
 			for(int i = MAX_ROUND; i>=0; i--){
 				for (Word w : word_pool.getWords()) {

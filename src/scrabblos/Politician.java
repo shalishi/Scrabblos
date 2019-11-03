@@ -45,6 +45,7 @@ public class Politician implements Runnable {
 				wordAct = new Word(new ArrayList<Letter>(), "", "", "");
 				wordDes = new ArrayList<String>();
 				long startTime = System.currentTimeMillis();
+				System.out.println("getFlagPassNextRound "+getFlagPassNextRound());
 				if (getFlagPassNextRound()) {
 					while ((System.currentTimeMillis() - startTime) < MotorA.TIME_UNIT_PER_ROUND * MILI_PER_SEC) {
 						Word word = makeWord();
@@ -418,11 +419,11 @@ public class Politician implements Runnable {
 	 * @return 
 	 */
 	private void updateWordPool(Word w) {
-		//System.out.println("update word pool " + Thread.currentThread().getId() + " " + pk);
+		System.out.println("update word pool " + Thread.currentThread().getId() + " " + pk);
 		synchronized (MotorA.getMotorA()) {
 			MotorA motor = MotorA.getMotorA();
 			motor.addWord(w);
-			// motor.showWordPool();
+			 motor.showWordPool();
 			// motor.showPoliticiansState();
 		}
 

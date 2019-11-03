@@ -13,7 +13,7 @@ public class WordPool {
 		this.words = words;
 	}
 
-	public long getCurrent_period() {
+	public int getCurrent_period() {
 		return current_period;
 	}
 
@@ -21,7 +21,7 @@ public class WordPool {
 		this.current_period = current_period;
 	}
 
-	public long getLast_period() {
+	public int getLast_period() {
 		return last_period;
 	}
 
@@ -38,6 +38,17 @@ public class WordPool {
 	}
 	
 	public ArrayList<Word> getWordsByPeriod(int current_period) {
+		ArrayList<Word> wordc = new ArrayList<Word>();
+		for(Word w:words) {
+			if(w.getPeriod() == current_period) {
+				wordc.add(w);
+			}
+		}
+		return wordc;
+		
+	}
+	
+	public ArrayList<Word> getCurrentPeriodWords() {
 		ArrayList<Word> wordc = new ArrayList<Word>();
 		for(Word w:words) {
 			if(w.getPeriod() == current_period) {

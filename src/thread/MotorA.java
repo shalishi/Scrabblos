@@ -2,8 +2,11 @@ package thread;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 import java.util.concurrent.locks.Lock;
 
 import scrabblos.Letter;
@@ -14,11 +17,11 @@ import scrabblos.WordPool;
 class MotorA {
 
 	private static MotorA motor = new MotorA();
-	private static boolean ROUND_FINISH_FLAG = false;
-	static int TIME_UNIT_PER_ROUND = 1;
+	private static boolean ROUND_FINISH_FLAG = true;
+	static int TIME_UNIT_PER_ROUND = 1*2;
 	static int MAX_ROUND = 10;
 	static int CLIENT_QTY = 12;
-	static int POLITTICIAN_QTY = 5;
+	static int POLITTICIAN_QTY = 10;
 	private static LetterPool letter_pool = new LetterPool(0,1,new ArrayList<Letter>());
 	private static WordPool word_pool = new WordPool(0,1,new ArrayList<Word> ());
 	private static final java.util.concurrent.locks.Lock lock = new java.util.concurrent.locks.ReentrantLock();
@@ -38,11 +41,12 @@ class MotorA {
 		lock.unlock();
 	}
 
-	public static Map<String, Boolean> getPoliticians_states() {
+	public static Boolean getPoliticians_states(String pk) {
 		lock.lock();
 		Map<String,Boolean> ps = politicians_states;
+		boolean state = ps.get(pk);
 		lock.unlock();
-		return ps;
+		return state;
 	}
 	
 	public static void registerPolitician(String s) {
@@ -60,30 +64,32 @@ class MotorA {
 	public static void updatePoliticianState(String s,boolean b) {
 		lock.lock();
 		politicians_states.put(s,b);
-		Iterator iter = politicians_states.entrySet().iterator();
-		Boolean passNextRound = true;
-    	//System.out.println("******************************************************politician states******************************************************");
-    	//System.out.println("s :"+s +" b:"+ b);
-	        while (iter.hasNext()) {
-	            Map.Entry<String,Boolean> ele = (Map.Entry<String,Boolean>) iter.next();
-	            if (ele.getValue()==false) {
-	            	passNextRound=false;
-	            	//break;
-	            	
-	            }
-	            //System.out.println(ele.getValue() + ": " +ele.getKey());
-	        }
-	    if(passNextRound)passNextRound();
 		lock.unlock();
 	}
-	
+	public static boolean flagPassNextRound() {
+		lock.lock();
+		//showPoliticiansState();
+		boolean OLD_ROUND_FINISH_FLAG = ROUND_FINISH_FLAG;
+		boolean passNextRound = politicians_states.values().stream().distinct().limit(2).count() < 2;
+		ROUND_FINISH_FLAG = passNextRound;
+	    if(!OLD_ROUND_FINISH_FLAG && ROUND_FINISH_FLAG)passNextRound();
+		lock.unlock();
+		return passNextRound;
+	}
 
 	public static void passNextRound() {
 		lock.lock();
 		System.out.println("******************************************************pass to next round******************************************************");
-		int cp = getLetter_pool().getCurrent_period();
-		letter_pool.setCurrent_period(++cp);
-		word_pool.setCurrent_period(++cp);
+		int cp = letter_pool.getCurrent_period()+1;
+		letter_pool.setCurrent_period(cp);
+		word_pool.setCurrent_period(cp);
+		
+		Iterator<Entry<String, Boolean>> it = politicians_states.entrySet().iterator();
+		while(it.hasNext()) {
+		    Entry<String, Boolean> e = it.next();
+		    politicians_states.put(e.getKey(), false);
+		}
+		
 		lock.unlock();
 	}
 	
@@ -119,6 +125,20 @@ class MotorA {
 		lock.unlock();
 		return lp;
 	}
+	
+	public static ArrayList<Letter> getCurrentLetter_pool() {
+		lock.lock();
+		LetterPool lp = letter_pool;
+		ArrayList<Letter> res = new ArrayList<Letter>();
+		for(Letter l : lp.getLetters()) {
+			if(l.getPeriod()==lp.getCurrent_period()) {
+				res.add(l);
+			}
+		}
+		lock.unlock();
+		return res;
+	}
+
 
 	public static void setLetter_pool(LetterPool letter_pool) {
 		lock.lock();
@@ -132,6 +152,25 @@ class MotorA {
 		lock.unlock();
 		return wp;
 	}
+	
+	public static ArrayList<Word> getCurrentWord_pool() {
+		lock.lock();
+		WordPool wp = word_pool;
+		ArrayList<Word> res = wp.getCurrentPeriodWords();
+		//System.out.println("period "+getCurrentPeriod() +" wordPool size"+wp.getWords().size()+"current wordPool size"+res.size());
+		lock.unlock();
+		return res;
+	}
+	
+	public static ArrayList<Word> getLastWord_pool() {
+		lock.lock();
+		WordPool wp = word_pool;
+		int p = getCurrentPeriod()-1;
+		ArrayList<Word> res = wp.getWordsByPeriod(p);
+		//System.out.println("last period "+getCurrentPeriod() +" wordPool size"+wp.getWords().size()+"last wordPool size"+res.size());
+		lock.unlock();
+		return res;
+	}
 
 	public static void setWord_pool(WordPool word_pool) {
 		lock.lock();
@@ -139,6 +178,13 @@ class MotorA {
 		lock.unlock();
 	}
 
+	public static int getCurrentPeriod() {
+		lock.lock();
+		//System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@word_pool period "+word_pool.getCurrent_period() +" letter_pool period"+letter_pool.getCurrent_period());
+		int p = letter_pool.getCurrent_period();
+		lock.unlock();
+		return p;
+	}
 	private MotorA() {
 	}
 
@@ -156,7 +202,7 @@ class MotorA {
 		lock.unlock();
 	}
 
-	public void showLetterPool() {
+	public static void showLetterPool() {
 		lock.lock();
 		try {
 			System.out.println("show letter pool-------------------------------------------------");
@@ -172,14 +218,14 @@ class MotorA {
 
 	}
 
-	public void addWord(Word w) {
+	public static void addWord(Word w) {
 		lock.lock();
 		word_pool.getWords().add(w);
 		lock.unlock();
 
 	}
 
-	public void showWordPool() {
+	public static void showWordPool() {
 		lock.lock();
 		try {
 			System.out.println("show WORD pool-------------------------------------------------");
@@ -195,7 +241,7 @@ class MotorA {
 
 	}
 	
-	public void showPoliticiansState() {
+	public static void showPoliticiansState() {
 		lock.lock();
 		try {
 			Iterator iter = politicians_states.entrySet().iterator();

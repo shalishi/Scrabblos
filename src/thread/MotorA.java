@@ -17,7 +17,7 @@ class MotorA {
 	private static MotorA motor = new MotorA();
 	private static boolean ROUND_FINISH_FLAG = true;
 	static int TIME_UNIT_PER_ROUND = 1 * 2;
-	static int MAX_ROUND = 20;
+	static int MAX_ROUND = 10;
 	static int CLIENT_QTY = 12;
 	static int POLITTICIAN_QTY = 10;
 	private static LetterPool letter_pool = new LetterPool(0, 1, new ArrayList<Letter>());
@@ -63,20 +63,6 @@ class MotorA {
 	public static void updatePoliticianState(String s, boolean b) {
 		lock.lock();
 		politicians_states.put(s, b);
-		Iterator iter = politicians_states.entrySet().iterator();
-		Boolean passNextRound = true;
-		while (iter.hasNext()) {
-			Map.Entry<String, Boolean> ele = (Map.Entry<String, Boolean>) iter.next();
-			if (ele.getValue() == false) {
-				passNextRound = false;
-				// break;
-
-			}
-			// System.out.println(ele.getValue() + ": " +ele.getKey());
-		}
-		if (passNextRound) {
-			passNextRound();
-		}
 		lock.unlock();
 	}
 
@@ -94,13 +80,15 @@ class MotorA {
 
 	public static void passNextRound() {
 		lock.lock();
+
 		System.out.println(
 				"******************************************************pass to next round******************************************************");
 		System.out.println("**************************period lp current " + letter_pool.getCurrent_period()
 				+ "**********************************");
-
+		// System.out.println("**************************period wp current
+		// "+word_pool.getCurrent_period()+"**********************************");
 		updateBlockChaine();
-		int cp = letter_pool.getCurrent_period()+1;
+		int cp = letter_pool.getCurrent_period() + 1;
 		letter_pool.setCurrent_period(cp);
 		word_pool.setCurrent_period(cp);
 		Iterator<Entry<String, Boolean>> it = politicians_states.entrySet().iterator();
@@ -310,7 +298,6 @@ class MotorA {
 
 	public static void jugement() {
 		lock.lock();
-
 		int maxSize = -1;
 		int maxBlock = -1;
 		for (int i = 0; i < blockchaines.size(); i++) {
@@ -319,6 +306,7 @@ class MotorA {
 			for (Word w : words) {
 				size += w.getWord().size();
 			}
+			
 			if (size > maxSize) {
 				maxSize = size;
 				maxBlock = i;
@@ -326,6 +314,7 @@ class MotorA {
 			System.out.println(blockchaines.get(i).getPoliticien() + "'s block have size of " + size);
 			System.out.println("maxBlock is "+maxBlock + "maxSize is "+ maxSize);
 		}
+		
 		if (maxBlock >= 0) {
 
 			Block winner = blockchaines.get(maxBlock);
@@ -345,7 +334,7 @@ class MotorA {
 				authorp.put(letters.get(i).getAuthor(), 0);
 			}
 			System.out.println("have "+authorp.size()+" of differents authors");
-			
+
 			for (int i = 0; i < letters.size(); i++) {
 				Iterator iter = authorp.entrySet().iterator();
 				while (iter.hasNext()) {
@@ -357,7 +346,7 @@ class MotorA {
 					}
 				}
 			}
-			
+
 			Iterator iter2 = authorp.entrySet().iterator();
 			while (iter2.hasNext()) {
 				Map.Entry<String, Integer> ele = (Map.Entry<String, Integer>) iter2.next();
@@ -365,7 +354,7 @@ class MotorA {
 			}
 		}
 
-		lock.unlock();
+			lock.unlock();
 	}
 
 }

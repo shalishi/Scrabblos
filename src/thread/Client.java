@@ -1,4 +1,3 @@
-
 package thread;
 
 import java.io.IOException;
@@ -10,6 +9,7 @@ import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Collections;
+
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import scrabblos.ED25519;
 import scrabblos.Letter;
@@ -163,7 +163,7 @@ public class Client implements Runnable {
 			return motor.getWord_pool().getWords();
 		}
 	}
-
+	
 	private ArrayList<Word> readCurrentWordPool() {
 		/*System.out.println("Thread Client " + Thread.currentThread().getId()
 				+ " is reading current word pool*********************************************");*/
@@ -173,7 +173,7 @@ public class Client implements Runnable {
 			return motor.getCurrentWord_pool();
 		}
 	}
-
+	
 	private ArrayList<Word> readLastWordPool() {
 		/*System.out.println("Thread Client " + Thread.currentThread().getId()
 				+ " is reading last word pool*********************************************");*/
@@ -217,21 +217,12 @@ public class Client implements Runnable {
 
 	protected void updateLetterPool() {
 
+		System.out.println("update letter pool");
 		Letter l = chooseLetter(LetterBag, getWordSignature());
 		synchronized (MotorA.getMotorA()) {
 			MotorA motor = MotorA.getMotorA();
-			ArrayList<Letter> letterpool = motor.getLetter_pool().getLetters();
-			boolean add = true;
-			for(Letter letter :letterpool) {
-				if(letter.getPeriod() == l.getPeriod() && letter.getAuthor() == l.getAuthor()) {
-					add = false;
-					System.out.println(l.getPeriod()+" ," +l.getLetter()+" :have added in letter pool as :"+letter.getLetter());
-					break;
-				}
-			}
-			if(add) motor.addLetter(l);
-
-			motor.showLetterPool();
+			motor.addLetter(l);
+			//motor.showLetterPool();
 		}
 	}
 

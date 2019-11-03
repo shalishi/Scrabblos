@@ -72,16 +72,16 @@ public class Politician implements Runnable {
 		}
 
 	}
-//
-//	private void passNextRound() {
-//		synchronized (MotorA.getMotorA()) {
-//			MotorA motor = MotorA.getMotorA();
-//			int cp = motor.getLetter_pool().getCurrent_period();
-//			motor.getLetter_pool().setCurrent_period(++cp);
-//			motor.getWord_pool().setCurrent_period(++cp);
-//		}
-//
-//	}
+
+	private void passNextRound() {
+		synchronized (MotorA.getMotorA()) {
+			MotorA motor = MotorA.getMotorA();
+			int cp = motor.getLetter_pool().getCurrent_period();
+			motor.getLetter_pool().setCurrent_period(++cp);
+			motor.getWord_pool().setCurrent_period(++cp);
+		}
+
+	}
 
 	private boolean getFlagPassNextRound() {
 		synchronized (MotorA.getMotorA()) {
@@ -246,13 +246,6 @@ public class Politician implements Runnable {
 		return entry.getKey();
 	}
 	
-	protected int getCurrentWordPoolPeriod() {
-		synchronized (MotorA.getMotorA()) {
-			MotorA motor = MotorA.getMotorA();
-			return motor.getWord_pool().getCurrent_period();
-		}
-	}
-	
 	protected Word makeWord()
 			throws IOException, JSONException, InvalidKeyException, NoSuchAlgorithmException, SignatureException {
 		// dans cette class nous devons ecrire l'algo de creation d'un mot
@@ -296,7 +289,7 @@ public class Politician implements Runnable {
 			//String head = Utils.bytesToHex(digest.digest((hash).getBytes()));
 			this.wordAct.setWord(word);
 			//System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!letterPool.getCurrent_period()"+letterPool.getCurrent_period());
-			this.wordAct.setPeriod(getCurrentWordPoolPeriod());
+			this.wordAct.setPeriod(letterPool.getCurrent_period());
 			this.wordAct.setSignature(signture);
 			this.wordAct.setHash(precedent);
 			this.wordAct.setPoliticien(pk);

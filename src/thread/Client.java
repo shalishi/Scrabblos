@@ -222,7 +222,7 @@ public class Client implements Runnable {
 		synchronized (MotorA.getMotorA()) {
 			MotorA motor = MotorA.getMotorA();
 			motor.addLetter(l);
-			//motor.showLetterPool();
+			motor.showLetterPool();
 		}
 	}
 

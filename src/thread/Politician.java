@@ -39,7 +39,7 @@ public class Politician implements Runnable {
 			// System.out.println("Thread Politician" + Thread.currentThread().getId()+ pk +
 			// " is running");
 			while (getCurrentPeriod()<= MotorA.MAX_ROUND) {
-				//System.out.println("++++++++++++++++++++++++++++++++Round :"+readLetterPool().getCurrent_period()+"+++++++++++++++++++++++++++++++++++++++");
+				//System.out.println("++++++++++++++++++++++++++++++++Round :"+getCurrentPeriod()+"+++++++++++++++++++++++++++++++++++++++");
 				wordAct = new Word(new ArrayList<Letter>(), "", "", "");
 				wordDes = new ArrayList<String>();
 				long startTime = System.currentTimeMillis();

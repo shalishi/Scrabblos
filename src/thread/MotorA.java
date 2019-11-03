@@ -82,13 +82,12 @@ class MotorA {
 
 	public static void passNextRound() {
 		lock.lock();
-
-		System.out.println(
+		/*System.out.println(
 				"******************************************************pass to next round******************************************************");
 		System.out.println("**************************period lp current " + letter_pool.getCurrent_period()
 				+ "**********************************");
 		// System.out.println("**************************period wp current
-		// "+word_pool.getCurrent_period()+"**********************************");
+		// "+word_pool.getCurrent_period()+"**********************************");*/
 		//updateBlockChaine();
 		int cp = letter_pool.getCurrent_period() + 1;
 		letter_pool.setCurrent_period(cp);
@@ -245,6 +244,7 @@ class MotorA {
 		lock.lock();
 		try {
 			System.out.println("show letter pool-------------------------------------------------");
+			System.out.println("++++++++++++++++++++++++++++++++Round :"+getCurrentPeriod()+"+++++++++++++++++++++++++++++++++++++++");
 			if (letter_pool.getLetters().size() > 0) {
 				for (Letter s : letter_pool.getLetters()) {
 					System.out.println(s.toString());
@@ -300,6 +300,7 @@ class MotorA {
 	
 	public static void judge() {
 		lock.lock();
+		System.out.println("++++++++++++++++++++++++++++++++++++++++++++It's judge time!++++++++++++++++++++++++++++++++++");
 		ArrayList<Word> currentWords = getLastWord_pool();
 		int maxSize = 0;
 		int maxSizeIndex = 0;
@@ -314,18 +315,23 @@ class MotorA {
 				}
 			}
 			String winner = currentWords.get(maxSizeIndex).getSignature();
-			System.out.println("maxBlock is "+winner + "maxSize is "+ maxSize);
+			//ZSystem.out.println("Max Block is "+winner + ", max Size is "+ maxSize);
+			String blockchaine= "" ;
 			for(int i = MAX_ROUND; i>=0; i--){
 				for (Word w : word_pool.getWords()) {
 					if(w.getSignature()==winner) {
-						System.out.println("politicien "+ w.getPoliticien() + " win "+ w.getWord().size() +" points.");
+						System.out.println("politicien : "+ w.getPoliticien() + " wins "+ w.getWord().size() +" points.");
 						winner = w.getHash();
+						String symbol = i!=0?" <- ":"";
+						blockchaine +=w.toWord()+symbol;
 						for(Letter l :w.getWord()) {
-							System.out.println("client "+ l.getAuthor() + " wins "+ 1 +" points.");
+							System.out.println("client : "+ l.getAuthor() + " wins "+ 1 +" points.");
 						}
 					}
 				}
 			}
+			System.out.println("Our blockchaine is :");
+			System.out.println(blockchaine);
 		}
 		
 		lock.unlock();
@@ -342,11 +348,9 @@ class MotorA {
 					int size = w.getWord().size();
 					if (w.getPeriod() > 0) {
 						hash = w.getHash();
-						//System.out.println("size  = " + size);
 						return size + getPreSize(hash);
 					}
 					if (w.getPeriod() == 0) {
-						//System.out.println("size  = " + size);
 						return size;
 					}
 				}
@@ -360,66 +364,5 @@ class MotorA {
 
 	}
 	
-	public static void jugement() {
-		lock.lock();
-		System.out.println("maxBlock is ");
-		int maxSize = -1;
-		int maxBlock = -1;
-		for (int i = 0; i < blockchaines.size(); i++) {
-			int size = 0;
-			ArrayList<Word> words = blockchaines.get(i).getBlock();
-			for (Word w : words) {
-				size += w.getWord().size();
-			}
-			
-			if (size > maxSize) {
-				maxSize = size;
-				maxBlock = i;
-			}
-			System.out.println(blockchaines.get(i).getPoliticien() + "'s block have size of " + size);
-			System.out.println("maxBlock is "+maxBlock + "maxSize is "+ maxSize);
-		}
-		
-		if (maxBlock >= 0) {
-
-			Block winner = blockchaines.get(maxBlock);
-			String str = winner.getPoliticien() + " has won, has " + winner.getBlock().size() + "blocks";
-			String str2 = ", has " + maxSize + "letters";
-			System.out.println(str + str2);
-			ArrayList<Word> words = winner.getBlock();
-			ArrayList<Letter> letters = new ArrayList<Letter>();
-			for (Word w : words) {
-				letters.addAll(w.getWord());
-			}
-
-			HashMap<String, Integer> authorp = new HashMap<String, Integer>();
-			for (int i = 0; i < letters.size(); i++) {
-				System.out.println((i + 1) + "eme letter " + letters.get(i).getLetter() + " author is "
-						+ letters.get(i).getAuthor());
-				authorp.put(letters.get(i).getAuthor(), 0);
-			}
-			System.out.println("have "+authorp.size()+" of differents authors");
-
-			for (int i = 0; i < letters.size(); i++) {
-				Iterator iter = authorp.entrySet().iterator();
-				while (iter.hasNext()) {
-					Map.Entry<String, Integer> ele = (Map.Entry<String, Integer>) iter.next();
-					if (ele.getKey() == letters.get(i).getAuthor()) {
-						int nbr = ele.getValue() + 1;
-						authorp.put(letters.get(i).getAuthor(), nbr);
-						//break;
-					}
-				}
-			}
-
-			Iterator iter2 = authorp.entrySet().iterator();
-			while (iter2.hasNext()) {
-				Map.Entry<String, Integer> ele = (Map.Entry<String, Integer>) iter2.next();
-				System.out.println(ele.getKey() + " has " + ele.getValue() + " letters in this word");
-			}
-		}
-
-			lock.unlock();
-	}
 
 }

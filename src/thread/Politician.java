@@ -8,7 +8,11 @@ import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SignatureException;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
+
+import org.json.JSONException;
 
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 import scrabblos.ED25519;
@@ -16,14 +20,15 @@ import scrabblos.Letter;
 import scrabblos.LetterPool;
 import scrabblos.Utils;
 import scrabblos.Word;
+import scrabblos.WordPool;
 
 public class Politician implements Runnable {
 
-	private static String pk; // public key
-	private static KeyPair kp;// signature
-	private Word wordAct;
-//	private ArrayList<String> wordDes;
-	private String hash = "";
+	private volatile String pk; // public key
+	private volatile KeyPair kp;// signature
+	private volatile Word wordAct;
+	private volatile ArrayList<String> wordDes;
+	private volatile String hash = "";
 	ArrayList<String> dictionary;
 	final int MILI_PER_SEC = 1000;
 
@@ -33,36 +38,32 @@ public class Politician implements Runnable {
 			dictionary = Utils.makeDictionnary("src/dict_dict_100000_1_10.txt");
 			createKey();
 			rigister(pk);
-			TimeUnit.MILLISECONDS.sleep(10);
 			// System.out.println("Thread Politician" + Thread.currentThread().getId()+ pk +
 			// " is running");
-
-			while (readLetterPool().getCurrent_period() <= MotorA.MAX_ROUND) {
-				// System.out.println("++++++++++++++++++++++++++++++++Round :"+readLetterPool().getCurrent_period()+"+++++++++++++++++++++++++++++++++++++++");
+			while (readLetterPool().getCurrent_period() < MotorA.MAX_ROUND) {
+				//System.out.println("++++++++++++++++++++++++++++++++Round :"+readLetterPool().getCurrent_period()+"+++++++++++++++++++++++++++++++++++++++");
 				wordAct = new Word(new ArrayList<Letter>(), "", "", "");
-				ArrayList<String> wordDes = new ArrayList<String>();
+				wordDes = new ArrayList<String>();
 				long startTime = System.currentTimeMillis();
-				while ((System.currentTimeMillis() - startTime) < MotorA.TIME_UNIT_PER_ROUND * MILI_PER_SEC) {
-					Word word = makeWord();
-					// System.out.println("here " +readLetterPool().getCurrent_period());
-					if (word != null) {
-						 System.out.println("here ");
-//						if (!inWordPool(word)) {
-//							if (inDictionary(word)) {
-								updateWordPool(word);
-								updateState(pk, true);
-//							}
-//						}
+				if (getFlagPassNextRound()) {
+					while ((System.currentTimeMillis() - startTime) < MotorA.TIME_UNIT_PER_ROUND * MILI_PER_SEC) {
+						Word word = makeWord();
+						// System.out.println("here " +readLetterPool().getCurrent_period());
+						if (word != null) {
+							// System.out.println("here " +readLetterPool().getCurrent_period());
+							if (!inWordPool(word)) {
+								if (inDictionary(word)) {
+									updateWordPool(word);
+								}
+							}
+						}
 					}
-					System.out.println("getState(pk)"+ getState(pk));
-				}
-				System.out.println("getState(pk)"+ getState(pk));
-				if(!getState(pk) && (System.currentTimeMillis() - startTime) >= MotorA.TIME_UNIT_PER_ROUND * MILI_PER_SEC) {
-					System.out.println("Time out,not make word");
+					//System.out.println("here update state politician " + pk);
 					updateState(pk, true);
+					//showPoliticiansState();
+					System.out.println("here getFlagPassNextRound" + getFlagPassNextRound());
 				}
-				// System.out.println("here update state politician");
-
+				//showWordPool();
 			}
 			showWordPool();
 
@@ -73,13 +74,29 @@ public class Politician implements Runnable {
 		}
 
 	}
+//
+//	private void passNextRound() {
+//		synchronized (MotorA.getMotorA()) {
+//			MotorA motor = MotorA.getMotorA();
+//			int cp = motor.getLetter_pool().getCurrent_period();
+//			motor.getLetter_pool().setCurrent_period(++cp);
+//			motor.getWord_pool().setCurrent_period(++cp);
+//		}
+//
+//	}
 
-	private void passNextRound() {
+	private boolean getFlagPassNextRound() {
 		synchronized (MotorA.getMotorA()) {
 			MotorA motor = MotorA.getMotorA();
-			int cp = motor.getLetter_pool().getCurrent_period();
-			motor.getLetter_pool().setCurrent_period(++cp);
-			motor.getWord_pool().setCurrent_period(++cp);
+			return motor.flagPassNextRound();
+		}
+
+	}
+
+	private void showPoliticiansState() {
+		synchronized (MotorA.getMotorA()) {
+			MotorA motor = MotorA.getMotorA();
+			motor.showPoliticiansState();
 		}
 
 	}
@@ -102,7 +119,7 @@ public class Politician implements Runnable {
 
 		synchronized (MotorA.getMotorA()) {
 			MotorA motor = MotorA.getMotorA();
-			return motor.getPoliticians_states().get(pk);
+			return motor.getPoliticians_states(pk);
 		}
 	}
 
@@ -121,7 +138,7 @@ public class Politician implements Runnable {
 
 	private boolean inDictionary(Word word) {
 		boolean flag = true;
-		for (String s : dictionary) {
+		for (String s : wordDes) {
 			for (int i = 0; i < word.getWord().size() - 1; i++) {
 				if (s.length() <= i)
 					continue;
@@ -136,12 +153,10 @@ public class Politician implements Runnable {
 		return false;
 	}
 
-	private boolean isValid(ArrayList<Letter> word) {
-		for (int i=0;i<word.size();i++) {
-			for (int j=i+1;j<word.size();j++) {
-				if(word.get(i).getAuthor() == word.get(j).getAuthor()) {
-					return false;
-				}
+	private boolean isValid(Letter l) {
+		for (Letter letterAct : this.wordAct.getWord()) {
+			if (letterAct.getAuthor() == l.getAuthor()) {
+				return true;
 			}
 		}
 		return true;
@@ -176,176 +191,131 @@ public class Politician implements Runnable {
 		}
 	}
 
-	public ArrayList<String> findWordDestinaire(Letter letters) {
+	protected ArrayList<Letter> readCurrentLetterPool() {
+		synchronized (MotorA.getMotorA()) {
+			MotorA motor = MotorA.getMotorA();
+			return motor.getCurrentLetter_pool();
+		}
+	}
+
+	public ArrayList<String> findWordDestinaire(ArrayList<Letter> letters) {
 		// System.out.println(" po find ----> wordAct = " + wordAct.getWord());
 		ArrayList<String> dest = new ArrayList<String>();
 		for (String s : dictionary) {
 			int i = 0;
 			// System.out.print(s);
-			if (s.length() <= 1) {
+			if (s.length() <= letters.size()) {
 				// System.out.println(" --> too short!!!");
 				continue;
 			} else {
-				if(s.charAt(0) == letters.getLetter().charAt(0)) {
-					dest.add(s);
+				for (Letter letter : letters) {
+					if (letter.getLetter().charAt(0) == s.charAt(i)) {
+						i++;
+						continue;
+					} else {
+						// System.out.println(" --> not match!!!");
+						break;
+					}
 				}
-//				for (Letter letter : letters) {
-//					if (letter.getLetter().charAt(0) == s.charAt(i)) {
-//						i++;
-//						continue;
-//					} else {
-//						// System.out.println(" --> not match!!!");
-//						break;
-//					}
-//				}
-//				if (i == letters.size())
-//					dest.add(s);
+				if (i == letters.size())
+					dest.add(s);
 			}
 		}
 		return dest;
 	}
 
-//	public void showWordDes() {
-//		System.out.println("show WORD DES+++++++++++++++++++++++++++++++++++++++++++++++++++++");
-//		if (wordDes.size() > 0) {
-//			for (String s : wordDes) {
-//				System.out.println(s);
-//			}
-//		}
-//		System.out.println("finish show  WORD DES+++++++++++++++++++++++++++++++++++++++++++++++");
-//	}
+	public void showWordDes() {
+		System.out.println("show WORD DES+++++++++++++++++++++++++++++++++++++++++++++++++++++");
+		if (wordDes.size() > 0) {
+			for (String s : wordDes) {
+				System.out.println(s);
+			}
+		}
+		System.out.println("finish show  WORD DES+++++++++++++++++++++++++++++++++++++++++++++++");
+	}
 
-	protected Word makeWord() {
+	private String choosePrecedent(ArrayList<Letter> ll) {		
+		Map<String,Integer> frequency = new HashMap<String,Integer>();
+		for(Letter l : ll) {
+			if(frequency.containsKey(l.getHash()))
+				frequency.put(l.getHash(), (frequency.get(l.getHash())+1));
+			else 
+				frequency.put(l.getHash(),1);
+		}
+		
+		frequency = U.sortByValue(frequency, false);
+		Map.Entry<String,Integer> entry = frequency.entrySet().iterator().next();
+		return entry.getKey();
+	}
+	
+	protected int getCurrentWordPoolPeriod() {
+		synchronized (MotorA.getMotorA()) {
+			MotorA motor = MotorA.getMotorA();
+			return motor.getWord_pool().getCurrent_period();
+		}
+	}
+	
+	protected Word makeWord()
+			throws IOException, JSONException, InvalidKeyException, NoSuchAlgorithmException, SignatureException {
+		// dans cette class nous devons ecrire l'algo de creation d'un mot
 		LetterPool letterPool = readLetterPool();
-		ArrayList<Letter> lp = letterPool.getCurrentLetters();
+		ArrayList<Letter> lp = readCurrentLetterPool();
 		if (lp.isEmpty())
 			return null;
-
-		ArrayList<Letter> wordLast = new ArrayList<Letter>();
-
+		String precedent = choosePrecedent(lp);
+		ArrayList<Letter> word = new ArrayList<Letter>();
 		boolean flag = false;
-		Letter l = lp.get((int) (Math.random() * (lp.size() - 1)));
-		wordLast.add(l);
-		int i = 1;
-		ArrayList<String> wordDes = findWordDestinaire(l);
-		ArrayList<Letter> word = (ArrayList<Letter>) wordLast.clone();
-		lp.remove(l);// can't use meme letter twice
-		for (String d : wordDes) { // foreach wordDes try to construct
-			word.clear();
+		if (wordAct.getWord().size() == 0) {
+			Letter l = lp.get((int) (Math.random() * (lp.size() - 1)));
 			word.add(l);
-			flag = false;
-			i = 1;
-			for (Letter letter : lp) {
-				if (d.length()-1 == i) { // if length of wordDes is = wordAct,try to find a new Des
+			wordDes = findWordDestinaire(word);
+			// showWordDes();
+			flag = true;
+		} else {
+			word = (ArrayList<Letter>) this.wordAct.getWord().clone();
+			int i = word.size();
+			for (String d : wordDes) {
+				for (Letter l : lp) {
+					if (d.length() <= i)
+						continue;
 					if (l.getLetter().charAt(0) == d.charAt(i)) {
-						word.add(l);
-						flag = true;
-						break;
-					}
-				} else {
-					if (l.getLetter().charAt(0) == d.charAt(i)) {
-						word.add(l);
-						i++;
+						if (isValid(l)) {
+							word.add(l);
+							wordDes = findWordDestinaire(word);
+							flag = true;
+							break;
+						}
 					}
 				}
-			}
-			if (flag && word.size() > wordLast.size() && isValid(word)) {
-				wordLast = (ArrayList<Letter>) word.clone();
+				if (flag)
+					break;
 			}
 		}
 
-		MessageDigest digest;
-		String signture;
-		try {
-			try {
-				digest = MessageDigest.getInstance("SHA-256");
-				signture = Utils.bytesToHex(Utils.signature2Poli(wordLast, digest.digest((hash).getBytes()), kp));
-				String head = Utils.bytesToHex(digest.digest((hash).getBytes()));
-				this.wordAct.setWord(wordLast);
-				this.wordAct.setPeriod(letterPool.getCurrent_period());
-				this.wordAct.setSignature(signture);
-				this.wordAct.setHash(head);
-				this.wordAct.setPoliticien(pk);
-				return this.wordAct;
-			} catch (NoSuchAlgorithmException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		} catch (InvalidKeyException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (SignatureException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if (flag) {
+			MessageDigest digest = MessageDigest.getInstance("SHA-256");
+			String signture = Utils.bytesToHex(Utils.signature2Poli(word, digest.digest((precedent).getBytes()), kp));
+			//String head = Utils.bytesToHex(digest.digest((hash).getBytes()));
+			this.wordAct.setWord(word);
+			//System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!letterPool.getCurrent_period()"+letterPool.getCurrent_period());
+			this.wordAct.setPeriod(getCurrentWordPoolPeriod());
+			this.wordAct.setSignature(signture);
+			this.wordAct.setHash(precedent);
+			this.wordAct.setPoliticien(pk);
+			return this.wordAct;
+		} else {
+			return null;
 		}
-
-		return null;
 
 	}
 
-//	protected Word makeWord()
-//			throws IOException, JSONException, InvalidKeyException, NoSuchAlgorithmException, SignatureException {
-//		// dans cette class nous devons ecrire l'algo de creation d'un mot
-//		LetterPool letterPool = readLetterPool();
-//		ArrayList<Letter> lp = letterPool.getCurrentLetters();
-//		if (lp.isEmpty())
-//			return null;
-//
-//		ArrayList<Letter> word = new ArrayList<Letter>();
-//		boolean flag = false;
-//		if (wordAct.getWord().size() == 0) {
-//			Letter l = lp.get((int) (Math.random() * (lp.size() - 1)));
-//			word.add(l);
-//			wordDes = findWordDestinaire(word);
-//			// showWordDes();
-//			flag = true;
-//		} else {
-//			word = (ArrayList<Letter>) this.wordAct.getWord().clone();
-//			int i = word.size();
-//			for (String d : wordDes) {
-//				for (Letter l : lp) {
-//					if (d.length() <= i)
-//						continue;
-//					if (l.getLetter().charAt(0) == d.charAt(i)) {
-//						if (isValid(l)) {
-//							word.add(l);
-//							wordDes = findWordDestinaire(word);
-//							flag = true;
-//							break;
-//						}
-//					}
-//				}
-//				if (flag)
-//					break;
-//			}
-//		}
-//
-//		if (flag) {
-//			MessageDigest digest = MessageDigest.getInstance("SHA-256");
-//			String signture = Utils.bytesToHex(Utils.signature2Poli(word, digest.digest((hash).getBytes()), kp));
-//			String head = Utils.bytesToHex(digest.digest((hash).getBytes()));
-//			this.wordAct.setWord(word);
-//			this.wordAct.setPeriod(letterPool.getCurrent_period());
-//			this.wordAct.setSignature(signture);
-//			this.wordAct.setHash(head);
-//			this.wordAct.setPoliticien(pk);
-//			return this.wordAct;
-//		} else {
-//			return null;
-//		}
-//
-//	}
-
 	protected void updateWordPool(Word w) {
-		System.out.println("update word pool");
+		System.out.println("update word pool " + Thread.currentThread().getId() + " " + pk);
 		synchronized (MotorA.getMotorA()) {
 			MotorA motor = MotorA.getMotorA();
 			motor.addWord(w);
-			motor.showWordPool();
-			motor.showPoliticiansState();
+			// motor.showWordPool();
+			// motor.showPoliticiansState();
 		}
 
 	}

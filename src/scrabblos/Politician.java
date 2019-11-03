@@ -45,7 +45,7 @@ public class Politician implements Runnable {
 				wordAct = new Word(new ArrayList<Letter>(), "", "", "");
 				wordDes = new ArrayList<String>();
 				long startTime = System.currentTimeMillis();
-				System.out.println("getFlagPassNextRound "+getFlagPassNextRound());
+				//System.out.println("getFlagPassNextRound "+getFlagPassNextRound());
 				if (getFlagPassNextRound()) {
 					while ((System.currentTimeMillis() - startTime) < MotorA.TIME_UNIT_PER_ROUND * MILI_PER_SEC) {
 						Word word = makeWord();

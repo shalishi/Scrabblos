@@ -98,10 +98,9 @@ class MotorA {
 				"******************************************************pass to next round******************************************************");
 		System.out.println("**************************period lp current " + letter_pool.getCurrent_period()
 				+ "**********************************");
-		// System.out.println("**************************period wp current
-		// "+word_pool.getCurrent_period()+"**********************************");
+
 		updateBlockChaine();
-		int cp = letter_pool.getCurrent_period() + 1;
+		int cp = letter_pool.getCurrent_period()+1;
 		letter_pool.setCurrent_period(cp);
 		word_pool.setCurrent_period(cp);
 		Iterator<Entry<String, Boolean>> it = politicians_states.entrySet().iterator();

@@ -163,7 +163,7 @@ public class Client implements Runnable {
 			return motor.getWord_pool().getWords();
 		}
 	}
-	
+
 	private ArrayList<Word> readCurrentWordPool() {
 		/*System.out.println("Thread Client " + Thread.currentThread().getId()
 				+ " is reading current word pool*********************************************");*/
@@ -173,7 +173,7 @@ public class Client implements Runnable {
 			return motor.getCurrentWord_pool();
 		}
 	}
-	
+
 	private ArrayList<Word> readLastWordPool() {
 		/*System.out.println("Thread Client " + Thread.currentThread().getId()
 				+ " is reading last word pool*********************************************");*/

@@ -63,8 +63,7 @@ public class Word {
 		for(Letter l : this.word) {
 			wordArray += l.getLetter();
 		}
-		return "word : "+ wordArray+", period : "+period+" ,head : "+this.head+" ,politicien : "+this.politicien + " ,signature : "+this.signature;
-				
+		return "word : "+ wordArray+" ,head : "+this.head+" ,politicien : "+this.politicien + " ,signature : "+this.signature;		
 	}
 	
 	public String toWord() {

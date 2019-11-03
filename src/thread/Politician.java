@@ -10,7 +10,6 @@ import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.json.JSONException;
 
@@ -20,7 +19,6 @@ import scrabblos.Letter;
 import scrabblos.LetterPool;
 import scrabblos.Utils;
 import scrabblos.Word;
-import scrabblos.WordPool;
 
 public class Politician implements Runnable {
 

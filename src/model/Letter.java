@@ -1,4 +1,4 @@
-package scrabblos;
+package model;
 
 public class Letter {
 	private String letter;

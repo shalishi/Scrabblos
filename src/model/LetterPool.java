@@ -1,4 +1,4 @@
-package scrabblos;
+package model;
 
 import java.util.ArrayList;
 

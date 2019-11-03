@@ -1,4 +1,4 @@
-package scrabblos;
+package tools;
 
 import java.security.InvalidKeyException;
 import java.security.KeyPair;

@@ -1,13 +1,6 @@
 package scrabblos;
 
-import java.io.BufferedWriter;
-import java.io.DataInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.net.InetAddress;
-import java.net.Socket;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.MessageDigest;
@@ -17,134 +10,275 @@ import java.security.SignatureException;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import model.Letter;
+import model.LetterPool;
+import model.Word;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
+import tools.ED25519;
+import tools.Utils;
 
-public class Client {
+public class Client implements Runnable {
+	private volatile String pk;
+	private volatile KeyPair kp;
+	private volatile ArrayList<String> LetterBag = new ArrayList<String>();
+	private volatile int current_period = -1;
+	private char[] bags = { 'b', 'd', 'u', 'q', 's', 'y', 'o', 'r', 'r', 'p', 'm', 'e', 'p', 'y', 's', 'l', 't', 'h',
+			'u', 'i', 'n', 'p', 'w', 't', 'w', 'a', 'e', 's', 'r', 'c', 'y', 'c', 'u', 'j', 'x', 't', 'i', 'o', 'k',
+			'k', 'c', 'c', 'l', 'w', 'y', 'c', 'w', 'o', 'y', 'x', 'g', 'c', 'u', 'y', 'g', 's', 's', 'c', 'q', 'q',
+			'a', 'x', 'd', 'm', 'j', 'e', 'l', 'f', 'f', 'g', 'k', 'x', 'p', 'm', 'j', 'x', 'a', 'y', 'g', 'p', 'd',
+			'g', 'g', 'i', 'j', 'o', 'g', 'w', 'r', 'a', 'd', 'b', 'p', 'm', 'o', 'e', 'p', 'v', 't', 'h', 'a', 'm',
+			'v', 'm', 'f', 'f', 'e', 's', 'v', 'r', 'o', 'v', 'h', 'o', 'v', 'q', 'a', 'm', 'c', 'b', 'e', 'q', 'g',
+			'd', 'p', 'd', 'x', 'q', 'k', 'f', 'p', 'k', 'f', 'a', 's', 'k', 'c', 'x', 'q', 'h', 'i', 'r', 'w', 's',
+			's', 'r', 'r', 'q', 'u', 'g', 's', 'n', 'x', 'f', 't', 'q', 'a', 'v', 'r', 'p', 't', 'n', 'h', 'p', 's',
+			'j', 'w', 'p', 'y', 'x', 'b', 't', 'v', 'v', 'g', 'a', 'y', 'q', 'm', 'k', 'm', 'x', 'c', 't', 'u', 'n',
+			'g', 'e', 'o', 'w', 'o', 'l', 'l', 'f', 'o', 'd', 'l', 'b', 'p', 'x' };
 
-	private static Socket socket;
-	private static String pk;
-	private static KeyPair kp;
-	
-	public static ArrayList<String> register(Socket socket) throws IOException, JSONException, NoSuchAlgorithmException, NoSuchProviderException {
-		
-		OutputStream os = socket.getOutputStream();
-		OutputStreamWriter osw = new OutputStreamWriter(os);
-		BufferedWriter bw = new BufferedWriter(osw);	
-		JSONObject json = new JSONObject();
-		
-		//CREATION DE LA CLE PUBLIQUE
-		ED25519 ed = new ED25519();
-		kp = ed.generateKeys();
-		EdDSAPublicKey public_k = (EdDSAPublicKey) kp.getPublic();
-		pk = Utils.bytesToHex(public_k.getAbyte());
-		
-		//ENVOIE DU MESSAGE AU SERVEUR
-		json.put("register",pk);
-		byte [] a =Utils.intToBigEndian(json.toString().length());
-		for(int i = a.length-1 ;i>=0 ;i--) {
-			bw.write((char)(a[i]));
-		}
-		bw.write(json.toString());
-		bw.flush();
-		InputStream is = socket.getInputStream();
-		//InputStreamReader isr = new InputStreamReader(is);
-		DataInputStream di = new DataInputStream(is);
-		JSONObject j = new JSONObject(Utils.readAnswer(di));
-		JSONArray alphabet = j.getJSONArray("letters_bag");
-		System.out.println(alphabet.toString());
-		ArrayList<String> letterbag = new ArrayList<String>();
-		for(int i = 0; i<alphabet.length();i++) {
-			letterbag.add(alphabet.getString(i));
-		}
-		//RECUPERATION DU SAC DE LETTRES
-		System.out.println(letterbag);
-		return letterbag;
-	}
-	
-	public static Letter choose_Letter(ArrayList<String> LetterBag, String hash) throws NoSuchAlgorithmException, InvalidKeyException, SignatureException, IOException {
-		MessageDigest digest = MessageDigest.getInstance("SHA-256");
-		Collections.shuffle(LetterBag);
-		String letter = LetterBag.get(0);
-		String signature = Utils.bytesToHex(Utils.signature2(letter,digest.digest((hash).getBytes()), 0, kp));
-		String head = Utils.bytesToHex(digest.digest((hash).getBytes()));
-		int period = 0;
-		return new Letter(letter, period, head, pk, signature);
-	}
-	
-	public static void inject_Letter(Socket s, ArrayList<String> LetterBag,String hash,BufferedWriter bw) throws IOException, JSONException, InvalidKeyException, NoSuchAlgorithmException, SignatureException {
-		MessageDigest digest = MessageDigest.getInstance("SHA-256");
-		
-		Letter l = choose_Letter(LetterBag,hash);
-		JSONObject json = new JSONObject();
-		json.put("letter", l.getLetter());
-		json.put("author",l.getAuthor());
-		json.put("signature", l.getSignature());
-		json.put("head",l.getHash());
-		json.put("period", l.getPeriod());
-		
-		String j = "{ \"inject_letter\": { \"letter\":\"a\", \"period\":0, \"head\":\"e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855\", \"author\":\"b7b597e0d64accdb6d8271328c75ad301c29829619f4865d31cc0c550046a08f\", \"signature\":\"8b6547447108e11c0092c95e460d70f367bc137d5f89c626642e1e5f2ce\" }}";
-		JSONObject json2 = new JSONObject();
-		json2.put("inject_letter", json);
-		System.out.println("taille" + json2.toString().length());
-		byte [] a =Utils.intToBigEndian(json2.toString().length());
-		System.out.println(a);
-		for(int i = a.length-1 ;i>=0 ;i--) {
-			System.out.println((char)(a[i]));
-			bw.write((char)(a[i]));
-		}
-		System.out.println(j);
-		bw.write(json2.toString());
-		bw.flush();
-	}
-	
-	/*
-	public static void main(String args[]) {
+	/**
+	 * Principle thread 
+	 * @param 
+	 * @return 
+	 */	
+	@Override
+	public void run() {
 		try {
-			String host = "localhost";
-			int port = 12345;
-			InetAddress address = InetAddress.getByName(host);
-			
-			// System.err.print(address);
-			socket = new Socket(address, port);
-			OutputStream os = socket.getOutputStream();
-			OutputStreamWriter osw = new OutputStreamWriter(os);
-			BufferedWriter bw = new BufferedWriter(osw);
-			// Send the message to the server
-			//ArrayList<Character> LetterBag = 
-			ArrayList<String> letterBag = register(socket);
-			//System.out.println(LetterBag);
-			inject_Letter(socket,letterBag,"",bw);
-			inject_Letter(socket,letterBag,"",bw);
-			inject_Letter(socket,letterBag,"",bw);
-			inject_Letter(socket,letterBag,"",bw);
+			//create key pair
+			creatKey();
+			//register client
+			rigister(pk);
+			//initialiser letter bag
+			for (char c : bags) {
+				LetterBag.add(c + "");
+			}
+			// round start
+			while (getCurrentPeriod() <= MotorA.MAX_ROUND) {
+				//every client throw only one letter per period
+				if (current_period < getCurrentPeriod()) {
+					updateLetterPool();
+					current_period++;
+				}
+			}
 
-			//inject_Letter(socket,LetterBag);
-			//continous_listen(socket,bw);
-			LetterPool lp = CommonOperations.get_full_letterpool(socket,bw);
-			//DiffLetterPool dif = CommonOperations.get_letterpool_since(socket,bw,0);
-			System.out.println("ah la la" + lp.getLetters());
-			
-			
-		} catch (IOException exception) {
-			exception.printStackTrace();
-			System.out.println("exception : " + exception.getMessage());
-		} catch (Exception exception) {
-			exception.printStackTrace();
-			System.out.println("exception : " + exception.getMessage());
-		} finally {
-			// Closing the socket
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	/**
+	 * Client register with public key
+	 * @param 
+	 * @return 
+	 */		
+	private void rigister(String public_key) {
+		synchronized (MotorA.getMotorA()) {
+			MotorA motor = MotorA.getMotorA();
+			motor.registerClient(public_key);
+		}
+	}
+	
+	/**
+	 * get Period
+	 * @param 
+	 * @return Period
+	 */	
+	protected int getPeriod() {
+		synchronized (MotorA.getMotorA()) {
+			MotorA motor = MotorA.getMotorA();
+			LetterPool letterpool = motor.getLetter_pool();
+			int periode = 0;
+			for (Letter letter : letterpool.getLetters()) {
+				if (letter.getPeriod() > periode)
+					periode = letter.getPeriod();
+			}
+			return periode;
+		}
+	}
+
+	
+	/**
+	 * Client choose a word that he want put in blockchaine  
+	 * @param 
+	 * @return hash value (signature of a word )
+	 */
+	private String getWordSignature() {
+		ArrayList<Word> wordPool = readLastWordPool();
+		
+		if (wordPool.size() > 0) {
+			int maxSize = 0;
+			int maxSizeIndex = 0;
+			for (Word w : wordPool) {
+				String str = w.getHash();
+				int size = getPreSize(str);
+				size += w.getWord().size();
+				if (size > maxSize) {
+					maxSize = size;
+					maxSizeIndex = wordPool.indexOf(w);
+				}
+			}
+			return wordPool.get(maxSizeIndex).getSignature();
+		}else {
+			MessageDigest digest;
 			try {
-				socket.close();
-			} catch (Exception e) {
+				digest = MessageDigest.getInstance("SHA-256");
+				return Utils.bytesToHex(digest.digest(("").getBytes()));
+			} catch (NoSuchAlgorithmException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
-				System.out.println("e : " + e.getMessage());
 			}
 		}
-	}*/
-	
-}
+		return "";
+	}
 
+	/**
+	 * Get the total size of all precedents of a word  
+	 * @param hash value (signature of a word )
+	 * @return int
+	 */
+	private int getPreSize(String hash) {
+		ArrayList<Word> wordPool = (ArrayList<Word>)readWordPool().clone();
+		MessageDigest digest;
+		try {
+			for (Word w : wordPool) {
+				digest = MessageDigest.getInstance("SHA-256");
+				String sighash = w.getSignature();//Utils.bytesToHex(digest.digest((w.getSignature()).getBytes()));
+				if (sighash == hash) {
+					int size = w.getWord().size();
+					if (w.getPeriod() > 0) {
+						hash = w.getHash();
+						return size + getPreSize(hash);
+					}
+					if (w.getPeriod() == 0) {
+						return size;
+					}
+				}
+			}
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		return 0;
+
+	}
+
+	/**
+	 * Read the full word pool 
+	 * @param 
+	 * @return ArrayList<Word>
+	 */
+	private ArrayList<Word> readWordPool() {
+		synchronized (MotorA.getMotorA()) {
+			MotorA motor = MotorA.getMotorA();
+			return motor.getWord_pool().getWords();
+		}
+	}
+	
+	/**
+	 * Read the current word pool 
+	 * @param 
+	 * @return ArrayList<Word>
+	 */
+	private ArrayList<Word> readCurrentWordPool() {
+		synchronized (MotorA.getMotorA()) {
+			MotorA motor = MotorA.getMotorA();
+			return motor.getCurrentWord_pool();
+		}
+	}
+	
+	/**
+	 * 
+	 * Read the words proposed by politician in the last period
+	 * @param 
+	 * @return ArrayList<Word>
+	 */
+	private ArrayList<Word> readLastWordPool() {
+		synchronized (MotorA.getMotorA()) {
+			MotorA motor = MotorA.getMotorA();
+			return motor.getLastWord_pool();
+		}
+	}
+
+	/**
+	 * 
+	 * Creat key pair
+	 * @param 
+	 * @return 
+	 */
+	private void creatKey() {
+		ED25519 ed;
+		try {
+			ed = new ED25519();
+			kp = ed.generateKeys();
+			EdDSAPublicKey public_k = (EdDSAPublicKey) kp.getPublic();
+			pk = Utils.bytesToHex(public_k.getAbyte());
+		} catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/**
+	 * 
+	 * Client choose a letter randomly then sign with his signature and the hash of last word he choosed
+	 * @param Full letter bag and hash value of last word choosed
+	 * @return Letter
+	 */
+	private Letter chooseLetter(ArrayList<String> LetterBag, String hash) {
+		MessageDigest digest;
+		try {
+			digest = MessageDigest.getInstance("SHA-256");
+			Collections.shuffle(LetterBag);
+			String letter = LetterBag.get(0);
+			String signature = Utils.bytesToHex(Utils.signature2(letter, digest.digest((hash).getBytes()), 0, kp));
+			String head = hash;//Utils.bytesToHex(digest.digest((hash).getBytes()));
+			return new Letter(letter, getLetterPool().getCurrent_period(), head, pk, signature);
+		} catch (NoSuchAlgorithmException | InvalidKeyException | SignatureException | IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/**
+	 * Update letter pool, client throw letter
+	 * Every client choose firstly a letter randomly then sign with his signature 
+	 * In the letter, ther is a pointeur who point to last word that client choose 
+	 * @param 
+	 * @return 
+	 */
+	
+	protected void updateLetterPool() {		
+		Letter l = chooseLetter(LetterBag, getWordSignature());
+		System.out.println("Client :"+pk+" update letter pool. Letter added : "+l.getLetter());
+		synchronized (MotorA.getMotorA()) {
+			MotorA motor = MotorA.getMotorA();
+			motor.addLetter(l);
+			//motor.showLetterPool();
+		}
+	}
+	/**
+	 * get full letter pool 
+	 * 
+	 * @param 
+	 * @return LetterPool.
+	 */
+	protected LetterPool getLetterPool() {
+		synchronized (MotorA.getMotorA()) {
+			MotorA motor = MotorA.getMotorA();
+			return motor.getLetter_pool();
+		}
+
+	}
+	/**
+	 * get current period number
+	 * 
+	 * @param 
+	 * @return current period.
+	 */
+	protected int getCurrentPeriod() {
+		synchronized (MotorA.getMotorA()) {
+			MotorA motor = MotorA.getMotorA();
+			return motor.getCurrentPeriod();
+		}
+
+	}
+
+	
+
+}

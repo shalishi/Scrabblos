@@ -1,4 +1,4 @@
-package scrabblos;
+package tools;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -14,6 +14,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SignatureException;
 import java.util.ArrayList;
 
+import model.Letter;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
 
 public class Utils {

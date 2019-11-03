@@ -1,4 +1,4 @@
-package thread;
+package scrabblos;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -9,10 +9,10 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.concurrent.locks.Lock;
 
-import scrabblos.Letter;
-import scrabblos.LetterPool;
-import scrabblos.Word;
-import scrabblos.WordPool;
+import model.Letter;
+import model.LetterPool;
+import model.Word;
+import model.WordPool;
 
 class MotorA {
 

@@ -1,4 +1,4 @@
-package thread;
+package scrabblos;
 
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidParameterException;

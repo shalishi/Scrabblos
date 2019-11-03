@@ -1,4 +1,4 @@
-package thread;
+package scrabblos;
 
 import java.io.IOException;
 import java.security.InvalidKeyException;
@@ -13,12 +13,12 @@ import java.util.Map;
 
 import org.json.JSONException;
 
+import model.Letter;
+import model.LetterPool;
+import model.Word;
 import net.i2p.crypto.eddsa.EdDSAPublicKey;
-import scrabblos.ED25519;
-import scrabblos.Letter;
-import scrabblos.LetterPool;
-import scrabblos.Utils;
-import scrabblos.Word;
+import tools.ED25519;
+import tools.Utils;
 
 public class Politician implements Runnable {
 

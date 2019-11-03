@@ -6,6 +6,10 @@ public class Main {
 
 	public static void main(String args[]) {
 
+		System.out.println("++++++++++++++++++++++++++++++++GAME START +++++++++++++++++++++++++++++++++++++++");
+
+		System.out.println("++++++++++++++++++++++++++++++++Round : 0 +++++++++++++++++++++++++++++++++++++++");
+
         for (int i=0; i<MotorA.CLIENT_QTY; i++) 
         { 
         	try {

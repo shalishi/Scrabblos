@@ -71,7 +71,7 @@ public class Client {
 		String letter = LetterBag.get(0);
 		String signature = Utils.bytesToHex(Utils.signature2(letter,digest.digest((hash).getBytes()), 0, kp));
 		String head = Utils.bytesToHex(digest.digest((hash).getBytes()));
-		long period = 0;
+		int period = 0;
 		return new Letter(letter, period, head, pk, signature);
 	}
 	

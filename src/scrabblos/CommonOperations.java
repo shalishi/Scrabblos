@@ -76,8 +76,8 @@ public class CommonOperations {
 		System.out.println(j2);		
 		
 		JSONArray letters = j2.getJSONArray("letters");
-		long current_period = j2.getInt("current_period");
-		long next_period = j2.getInt("next_period");
+		int current_period = j2.getInt("current_period");
+		int next_period = j2.getInt("next_period");
 		System.out.println(letters.toString());
 		ArrayList<Letter> lettersA = new ArrayList<Letter>();
 		for (int i = 0; i < letters.length(); i++) {
@@ -130,13 +130,13 @@ public class CommonOperations {
 		System.out.println(j2);
 		
 		JSONObject letterpool = (JSONObject) j2.get("letterpool");
-		long since = j2.getInt("since");
+		int since = j2.getInt("since");
 		
 		System.out.println(letterpool);
 		
 		JSONArray letters = letterpool.getJSONArray("letters");
-		long current_period = letterpool.getInt("current_period");
-		long next_period = letterpool.getInt("next_period");
+		int current_period = letterpool.getInt("current_period");
+		int next_period = letterpool.getInt("next_period");
 		System.out.println(letters.toString());
 		ArrayList<Letter> lettersA = new ArrayList<Letter>();
 		for (int i = 0; i < letters.length(); i++) {
@@ -176,8 +176,8 @@ public class CommonOperations {
 		System.out.println(j2);
 						
 		JSONArray words = j2.getJSONArray("words");
-		long current_period = j2.getInt("current_period");
-		long next_period = j2.getInt("next_period");
+		int current_period = j2.getInt("current_period");
+		int next_period = j2.getInt("next_period");
 		
 		ArrayList<Word> wordsA = new ArrayList<Word>();
 		
@@ -231,13 +231,13 @@ public class CommonOperations {
 		System.out.println(j2);
 		
 		JSONObject wordpool = (JSONObject) j2.get("wordpool");
-		long since = j2.getInt("period");
+		int since = j2.getInt("period");
 		
 		System.out.println(wordpool);
 		
 		JSONArray words = wordpool.getJSONArray("words");
-		long current_period = wordpool.getInt("current_period");
-		long next_period = wordpool.getInt("next_period");
+		int current_period = wordpool.getInt("current_period");
+		int next_period = wordpool.getInt("next_period");
 		ArrayList<Word> wordsA = new ArrayList<Word>();
 		
 		

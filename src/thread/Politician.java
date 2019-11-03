@@ -23,32 +23,32 @@ import scrabblos.Word;
 public class Politician implements Runnable {
 
 	private volatile String pk; // public key
-	private volatile KeyPair kp;// signature
+	private volatile KeyPair kp;// Signature
 	private volatile Word wordAct;
 	private volatile ArrayList<String> wordDes;
 	private volatile String hash = "";
-	ArrayList<String> dictionary;
-	final int MILI_PER_SEC = 1000;
+	private volatile ArrayList<String> dictionary;
+	private volatile int MILI_PER_SEC = 1000;
 
+	/**
+	 * Principle thread 
+	 * @param 
+	 * @return 
+	 */	
 	@Override
 	public void run() {
 		try {
 			dictionary = Utils.makeDictionnary("src/dict_dict_100000_1_10.txt");
 			createKey();
 			rigister(pk);
-			// System.out.println("Thread Politician" + Thread.currentThread().getId()+ pk +
-			// " is running");
 			while (getCurrentPeriod()<= MotorA.MAX_ROUND) {
-				//System.out.println("++++++++++++++++++++++++++++++++Round :"+getCurrentPeriod()+"+++++++++++++++++++++++++++++++++++++++");
 				wordAct = new Word(new ArrayList<Letter>(), "", "", "");
 				wordDes = new ArrayList<String>();
 				long startTime = System.currentTimeMillis();
 				if (getFlagPassNextRound()) {
 					while ((System.currentTimeMillis() - startTime) < MotorA.TIME_UNIT_PER_ROUND * MILI_PER_SEC) {
 						Word word = makeWord();
-						// System.out.println("here " +readLetterPool().getCurrent_period());
 						if (word != null) {
-							// System.out.println("here " +readLetterPool().getCurrent_period());
 							if (!inWordPool(word)) {
 								if (inDictionary(word)) {
 									updateWordPool(word);
@@ -56,10 +56,8 @@ public class Politician implements Runnable {
 							}
 						}
 					}
-					//System.out.println("here update state politician " + pk);
 					updateState(pk, true);
 					//showPoliticiansState();
-					System.out.println("FlagPassNextRound : " + getFlagPassNextRound());
 				}
 				//showWordPool();
 			}
@@ -68,12 +66,15 @@ public class Politician implements Runnable {
 			judge();
 
 		} catch (Exception e) {
-			// Throwing an exception
-			System.out.println("get state of :" + pk);
 			e.printStackTrace();
 		}
 
 	}
+	/**
+	 * Call judge process 
+	 * @param 
+	 * @return 
+	 */	
 	private void judge(){
 		synchronized (MotorA.getMotorA()) {
 			MotorA motor = MotorA.getMotorA();
@@ -82,25 +83,27 @@ public class Politician implements Runnable {
 
 	}
 	
-	protected int getCurrentPeriod() {
-
+	/**
+	 * get current period number
+	 * 
+	 * @param 
+	 * @return current period.
+	 */
+	private int getCurrentPeriod() {
 		synchronized (MotorA.getMotorA()) {
 			MotorA motor = MotorA.getMotorA();
 			return motor.getCurrentPeriod();
 		}
 
 	}
-		
-	private void passNextRound() {
-		synchronized (MotorA.getMotorA()) {
-			MotorA motor = MotorA.getMotorA();
-			int cp = motor.getLetter_pool().getCurrent_period();
-			motor.getLetter_pool().setCurrent_period(++cp);
-			motor.getWord_pool().setCurrent_period(++cp);
-		}
 
-	}
-
+	/**
+	 * Check if all politicians have finished making word
+	 * If all politician finish, then return ture, otherwise return false 
+	 * 
+	 * @param 
+	 * @return boolean.
+	 */
 	private boolean getFlagPassNextRound() {
 		synchronized (MotorA.getMotorA()) {
 			MotorA motor = MotorA.getMotorA();
@@ -109,6 +112,12 @@ public class Politician implements Runnable {
 
 	}
 
+	/**
+	 * Show politicians' state
+	 * Show if they have finished making word
+	 * @param 
+	 * @return 
+	 */
 	private void showPoliticiansState() {
 		synchronized (MotorA.getMotorA()) {
 			MotorA motor = MotorA.getMotorA();
@@ -117,6 +126,12 @@ public class Politician implements Runnable {
 
 	}
 
+	/**
+	 * Politician register
+	 * 
+	 * @param 
+	 * @return
+	 */
 	private void rigister(String public_key) {
 		synchronized (MotorA.getMotorA()) {
 			MotorA motor = MotorA.getMotorA();
@@ -124,6 +139,12 @@ public class Politician implements Runnable {
 		}
 	}
 
+	/**
+	 * Politician update his state when he finish making word
+	 * 
+	 * @param 
+	 * @return
+	 */
 	private void updateState(String public_key, boolean state) {
 		synchronized (MotorA.getMotorA()) {
 			MotorA motor = MotorA.getMotorA();
@@ -131,6 +152,12 @@ public class Politician implements Runnable {
 		}
 	}
 
+	/**
+	 * Get politician's state
+	 * 
+	 * @param 
+	 * @return boolean
+	 */
 	private boolean getState(String public_key) {
 
 		synchronized (MotorA.getMotorA()) {
@@ -139,6 +166,12 @@ public class Politician implements Runnable {
 		}
 	}
 
+	/**
+	 * Check if a word is already in word pool
+	 * 
+	 * @param 
+	 * @return boolean
+	 */
 	private boolean inWordPool(Word word) {
 		synchronized (MotorA.getMotorA()) {
 			MotorA motor = MotorA.getMotorA();
@@ -152,6 +185,12 @@ public class Politician implements Runnable {
 		}
 	}
 
+	/**
+	 * Check if a word is in dictionary
+	 * 
+	 * @param 
+	 * @return boolean
+	 */
 	private boolean inDictionary(Word word) {
 		boolean flag = true;
 		for (String s : wordDes) {
@@ -169,6 +208,13 @@ public class Politician implements Runnable {
 		return false;
 	}
 
+	/**
+	 * Check if a word is valid
+	 * That means there is no more than one letter who belong to the same client in a word
+	 * 
+	 * @param 
+	 * @return boolean
+	 */
 	private boolean isValid(Letter l) {
 		for (Letter letterAct : this.wordAct.getWord()) {
 			if (letterAct.getAuthor().equals(l.getAuthor())) {
@@ -178,6 +224,12 @@ public class Politician implements Runnable {
 		return true;
 	}
 
+	/**
+	 * Create key pair
+	 * 
+	 * @param 
+	 * @return
+	 */
 	private void createKey() {
 		ED25519 ed;
 		try {
@@ -194,34 +246,44 @@ public class Politician implements Runnable {
 		}
 	}
 
-	protected LetterPool readLetterPool() {
-		// System.out.println("Thread Politician is reading letter
-		// pool*********************************************");
+	/**
+	 * Read the full letter pool
+	 * 
+	 * @param 
+	 * @return 
+	 */
+	private LetterPool readLetterPool() {
 		synchronized (MotorA.getMotorA()) {
-
 			MotorA motor = MotorA.getMotorA();
 			// motor.showLetterPool();
-			// System.out.println("Thread Politician is finished of reading letter
-			// pool**********************************");
 			return motor.getLetter_pool();
 		}
 	}
 
-	protected ArrayList<Letter> readCurrentLetterPool() {
+	/**
+	 * Read the current period's letter pool
+	 * 
+	 * @param 
+	 * @return 
+	 */
+	private ArrayList<Letter> readCurrentLetterPool() {
 		synchronized (MotorA.getMotorA()) {
 			MotorA motor = MotorA.getMotorA();
 			return motor.getCurrentLetter_pool();
 		}
 	}
 
-	public ArrayList<String> findWordDestinaire(ArrayList<Letter> letters) {
-		// System.out.println(" po find ----> wordAct = " + wordAct.getWord());
+	/**
+	 * Find all words who start with prefix given in dictionary
+	 * 
+	 * @param prefix ArrayList<Letter> letters
+	 * @return ArrayList<String> words
+	 */
+	private ArrayList<String> findWordDestinaire(ArrayList<Letter> letters) {
 		ArrayList<String> dest = new ArrayList<String>();
 		for (String s : dictionary) {
 			int i = 0;
-			// System.out.print(s);
 			if (s.length() <= letters.size()) {
-				// System.out.println(" --> too short!!!");
 				continue;
 			} else {
 				for (Letter letter : letters) {
@@ -229,7 +291,6 @@ public class Politician implements Runnable {
 						i++;
 						continue;
 					} else {
-						// System.out.println(" --> not match!!!");
 						break;
 					}
 				}
@@ -240,7 +301,13 @@ public class Politician implements Runnable {
 		return dest;
 	}
 
-	public void showWordDes() {
+	/**
+	 * Show target word
+	 * 
+	 * @param 
+	 * @return
+	 */
+	private void showWordDes() {
 		System.out.println("show WORD DES+++++++++++++++++++++++++++++++++++++++++++++++++++++");
 		if (wordDes.size() > 0) {
 			for (String s : wordDes) {
@@ -250,6 +317,12 @@ public class Politician implements Runnable {
 		System.out.println("finish show  WORD DES+++++++++++++++++++++++++++++++++++++++++++++++");
 	}
 
+	/**
+	 * Politician choose the precedent for his new word
+	 * 
+	 * @param  letters available for making new word
+	 * @return signature of the precedent
+	 */
 	private String choosePrecedent(ArrayList<Letter> ll) {		
 		Map<String,Integer> frequency = new HashMap<String,Integer>();
 		for(Letter l : ll) {
@@ -264,6 +337,12 @@ public class Politician implements Runnable {
 		return entry.getKey();
 	}
 	
+	/**
+	 * Filter letters list by specific head
+	 * 
+	 * @param  head
+	 * @return letters list
+	 */
 	private ArrayList<Letter> filterLPByHead(ArrayList<Letter> ll, String head) {		
 		ArrayList<Letter> res = new ArrayList<Letter>();
 		for(Letter l : ll) {
@@ -274,9 +353,14 @@ public class Politician implements Runnable {
 		return res;
 	}
 	
-	protected Word makeWord()
+	/**
+	 * make word
+	 * 
+	 * @param  
+	 * @return Word valid
+	 */
+	private Word makeWord()
 			throws IOException, JSONException, InvalidKeyException, NoSuchAlgorithmException, SignatureException {
-		// dans cette class nous devons ecrire l'algo de creation d'un mot
 		LetterPool letterPool = readLetterPool();
 		ArrayList<Letter> lp = readCurrentLetterPool();
 		if (lp.isEmpty())
@@ -315,9 +399,7 @@ public class Politician implements Runnable {
 		if (flag) {
 			MessageDigest digest = MessageDigest.getInstance("SHA-256");
 			String signture = Utils.bytesToHex(Utils.signature2Poli(word, digest.digest((precedent).getBytes()), kp));
-			//String head = Utils.bytesToHex(digest.digest((hash).getBytes()));
 			this.wordAct.setWord(word);
-			//System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!letterPool.getCurrent_period()"+letterPool.getCurrent_period());
 			this.wordAct.setPeriod(letterPool.getCurrent_period());
 			this.wordAct.setSignature(signture);
 			this.wordAct.setHash(precedent);
@@ -329,8 +411,14 @@ public class Politician implements Runnable {
 
 	}
 
-	protected void updateWordPool(Word w) {
-		System.out.println("update word pool " + Thread.currentThread().getId() + " " + pk);
+	/**
+	 * Politician throw word in word pool
+	 * 
+	 * @param  Word w
+	 * @return 
+	 */
+	private void updateWordPool(Word w) {
+		//System.out.println("update word pool " + Thread.currentThread().getId() + " " + pk);
 		synchronized (MotorA.getMotorA()) {
 			MotorA motor = MotorA.getMotorA();
 			motor.addWord(w);
@@ -339,7 +427,12 @@ public class Politician implements Runnable {
 		}
 
 	}
-
+	/**
+	 * Show the full word pool
+	 * 
+	 * @param 
+	 * @return
+	 */
 	protected void showWordPool() {
 		System.out.println("show word pool");
 		synchronized (MotorA.getMotorA()) {
@@ -347,22 +440,6 @@ public class Politician implements Runnable {
 			motor.showWordPool();
 		}
 
-	}
-
-	private Word getLongest() {
-		synchronized (MotorA.getMotorA()) {
-			MotorA motor = MotorA.getMotorA();
-			ArrayList<Word> wordpool = motor.getWord_pool().getWords();
-			Word word = null;
-			int max = 0;
-			for (Word w : wordpool) {
-				if (w.getWord().size() > max) {
-					word = w;
-					max = w.getWord().size();
-				}
-			}
-			return word;
-		}
 	}
 
 }

@@ -27,21 +27,14 @@ class MotorA {
 	private static final java.util.concurrent.locks.Lock lock = new java.util.concurrent.locks.ReentrantLock();
 	private static Map<String, Boolean> clients_states = new HashMap<String, Boolean>();
 	private static Map<String, Boolean> politicians_states = new HashMap<String, Boolean>();
-	private static ArrayList<Block> blockchaines = new ArrayList<Block>();
 
-	public static Map<String, Boolean> getClients_states() {
-		lock.lock();
-		Map<String, Boolean> cs = clients_states;
-		lock.unlock();
-		return cs;
-	}
 
-	public static void setClients_states(Map<String, Boolean> clients_states) {
-		lock.lock();
-		MotorA.clients_states = clients_states;
-		lock.unlock();
-	}
-
+	/**
+	 * Get politician's state by public key
+	 * 
+	 * @param 
+	 * @return boolean
+	 */
 	public static Boolean getPoliticians_states(String pk) {
 		lock.lock();
 		Map<String, Boolean> ps = politicians_states;
@@ -50,24 +43,48 @@ class MotorA {
 		return state;
 	}
 
+	/**
+	 * Politician register
+	 * 
+	 * @param 
+	 * @return
+	 */
 	public static void registerPolitician(String s) {
 		lock.lock();
 		politicians_states.put(s, false);
 		lock.unlock();
 	}
 
+	/**
+	 * Client register with public key
+	 * @param 
+	 * @return 
+	 */
 	public static void registerClient(String s) {
 		lock.lock();
 		clients_states.put(s, false);
 		lock.unlock();
 	}
 
+	/**
+	 *  Update politician's state 
+	 * 
+	 * @param 
+	 * @return
+	 */
 	public static void updatePoliticianState(String s, boolean b) {
 		lock.lock();
 		politicians_states.put(s, b);
 		lock.unlock();
 	}
 
+	/**
+	 * Check if all politicians have finished making word
+	 * If all politician finish, then return true, otherwise return false 
+	 * 
+	 * @param 
+	 * @return boolean.
+	 */
 	public static boolean flagPassNextRound() {
 		lock.lock();
 		// showPoliticiansState();
@@ -80,15 +97,15 @@ class MotorA {
 		return passNextRound;
 	}
 
+	/**
+	 *  Pass to next period 
+	 * 
+	 * @param 
+	 * @return
+	 */
 	public static void passNextRound() {
 		lock.lock();
-		/*System.out.println(
-				"******************************************************pass to next round******************************************************");
-		System.out.println("**************************period lp current " + letter_pool.getCurrent_period()
-				+ "**********************************");
-		// System.out.println("**************************period wp current
-		// "+word_pool.getCurrent_period()+"**********************************");*/
-		//updateBlockChaine();
+		System.out.println("++++++++++++++++++++++++++++++++Round :"+(getCurrentPeriod()+1)+"+++++++++++++++++++++++++++++++++++++++");
 		int cp = letter_pool.getCurrent_period() + 1;
 		letter_pool.setCurrent_period(cp);
 		word_pool.setCurrent_period(cp);
@@ -97,39 +114,6 @@ class MotorA {
 			Entry<String, Boolean> e = it.next();
 			politicians_states.put(e.getKey(), false);
 		}
-		//jugement();
-
-		lock.unlock();
-	}
-
-	public static ArrayList<Word> getBlockByPoliticien(String s) {
-		lock.lock();
-		for (Block b : MotorA.blockchaines) {
-			if (b.getPoliticien() == s) {
-
-				return b.getBlock();
-			}
-		}
-		ArrayList<Word> bloc = new ArrayList<Word>();
-		Block newblock = new Block(bloc, s);
-		MotorA.blockchaines.add(newblock);
-		lock.unlock();
-		return bloc;
-	}
-
-	public static void updateBlockChaine() {
-		lock.lock();
-		ArrayList<Word> wordpool = getCurrentWord_pool();
-		for (Word w : wordpool) {
-			ArrayList<Word> bloc = getBlockByPoliticien(w.getPoliticien());
-			bloc.add(w);
-		}
-		lock.unlock();
-	}
-
-	public static void updateClientState(String s, boolean b) {
-		lock.lock();
-		clients_states.put(s, b);
 		lock.unlock();
 	}
 
@@ -139,6 +123,7 @@ class MotorA {
 		lock.unlock();
 	}
 
+	
 	public static boolean getROUND_FINISH_FLAG() {
 		lock.lock();
 		boolean f = ROUND_FINISH_FLAG;
@@ -190,8 +175,6 @@ class MotorA {
 		lock.lock();
 		WordPool wp = word_pool;
 		ArrayList<Word> res = wp.getCurrentPeriodWords();
-		// System.out.println("period "+getCurrentPeriod() +" wordPool
-		// size"+wp.getWords().size()+"current wordPool size"+res.size());
 		lock.unlock();
 		return res;
 	}
@@ -201,8 +184,6 @@ class MotorA {
 		WordPool wp = word_pool;
 		int p = getCurrentPeriod() - 1;
 		ArrayList<Word> res = wp.getWordsByPeriod(p);
-		// System.out.println("last period "+getCurrentPeriod() +" wordPool
-		// size"+wp.getWords().size()+"last wordPool size"+res.size());
 		lock.unlock();
 		return res;
 	}
@@ -215,9 +196,6 @@ class MotorA {
 
 	public static int getCurrentPeriod() {
 		lock.lock();
-		// System.out.println("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@word_pool period
-		// "+word_pool.getCurrent_period() +" letter_pool
-		// period"+letter_pool.getCurrent_period());
 		int p = letter_pool.getCurrent_period();
 		lock.unlock();
 		return p;
@@ -243,14 +221,13 @@ class MotorA {
 	public static void showLetterPool() {
 		lock.lock();
 		try {
-			System.out.println("show letter pool-------------------------------------------------");
-			System.out.println("++++++++++++++++++++++++++++++++Round :"+getCurrentPeriod()+"+++++++++++++++++++++++++++++++++++++++");
+			System.out.println("------------------------------show letter pool-------------------------------------------------");
 			if (letter_pool.getLetters().size() > 0) {
 				for (Letter s : letter_pool.getLetters()) {
 					System.out.println(s.toString());
 				}
 			}
-			System.out.println("finish show letter pool------------------------------------------");
+			System.out.println("-------------------------------finish show letter pool------------------------------------------");
 		} finally {
 			lock.unlock();
 		}
@@ -267,13 +244,13 @@ class MotorA {
 	public static void showWordPool() {
 		lock.lock();
 		try {
-			System.out.println("show WORD pool-------------------------------------------------");
+			System.out.println("---------------------------------show WORD pool-------------------------------------------------");
 			if (word_pool.getWords().size() > 0) {
 				for (Word w : word_pool.getWords()) {
 					System.out.println(w.toString());
 				}
 			}
-			System.out.println("finish show WORD pool------------------------------------------");
+			System.out.println("---------------------------------finish show WORD pool------------------------------------------");
 		} finally {
 			lock.unlock();
 		}
@@ -337,6 +314,11 @@ class MotorA {
 		lock.unlock();
 	}
 
+	/**
+	 * Get the total size of all precedents of a word  
+	 * @param hash value (signature of a word )
+	 * @return int
+	 */
 	private static int getPreSize(String hash) {
 		lock.lock();
 		MessageDigest digest;

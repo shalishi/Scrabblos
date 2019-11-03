@@ -38,7 +38,7 @@ public class Politician implements Runnable {
 			rigister(pk);
 			// System.out.println("Thread Politician" + Thread.currentThread().getId()+ pk +
 			// " is running");
-			while (readLetterPool().getCurrent_period() < MotorA.MAX_ROUND) {
+			while (getCurrentPeriod()<= MotorA.MAX_ROUND) {
 				//System.out.println("++++++++++++++++++++++++++++++++Round :"+readLetterPool().getCurrent_period()+"+++++++++++++++++++++++++++++++++++++++");
 				wordAct = new Word(new ArrayList<Letter>(), "", "", "");
 				wordDes = new ArrayList<String>();
@@ -59,11 +59,13 @@ public class Politician implements Runnable {
 					//System.out.println("here update state politician " + pk);
 					updateState(pk, true);
 					//showPoliticiansState();
-					System.out.println("here getFlagPassNextRound" + getFlagPassNextRound());
+					System.out.println("FlagPassNextRound : " + getFlagPassNextRound());
 				}
 				//showWordPool();
 			}
+			
 			showWordPool();
+			judge();
 
 		} catch (Exception e) {
 			// Throwing an exception
@@ -72,7 +74,23 @@ public class Politician implements Runnable {
 		}
 
 	}
+	private void judge(){
+		synchronized (MotorA.getMotorA()) {
+			MotorA motor = MotorA.getMotorA();
+			motor.judge();
+		}
 
+	}
+	
+	protected int getCurrentPeriod() {
+
+		synchronized (MotorA.getMotorA()) {
+			MotorA motor = MotorA.getMotorA();
+			return motor.getCurrentPeriod();
+		}
+
+	}
+		
 	private void passNextRound() {
 		synchronized (MotorA.getMotorA()) {
 			MotorA motor = MotorA.getMotorA();
@@ -153,8 +171,8 @@ public class Politician implements Runnable {
 
 	private boolean isValid(Letter l) {
 		for (Letter letterAct : this.wordAct.getWord()) {
-			if (letterAct.getAuthor() == l.getAuthor()) {
-				return true;
+			if (letterAct.getAuthor().equals(l.getAuthor())) {
+				return false;
 			}
 		}
 		return true;
@@ -246,6 +264,16 @@ public class Politician implements Runnable {
 		return entry.getKey();
 	}
 	
+	private ArrayList<Letter> filterLPByHead(ArrayList<Letter> ll, String head) {		
+		ArrayList<Letter> res = new ArrayList<Letter>();
+		for(Letter l : ll) {
+			if(l.getHash()==head)
+				res.add(l);
+				
+		}
+		return res;
+	}
+	
 	protected Word makeWord()
 			throws IOException, JSONException, InvalidKeyException, NoSuchAlgorithmException, SignatureException {
 		// dans cette class nous devons ecrire l'algo de creation d'un mot
@@ -254,6 +282,7 @@ public class Politician implements Runnable {
 		if (lp.isEmpty())
 			return null;
 		String precedent = choosePrecedent(lp);
+		lp = filterLPByHead(lp,precedent);
 		ArrayList<Letter> word = new ArrayList<Letter>();
 		boolean flag = false;
 		if (wordAct.getWord().size() == 0) {

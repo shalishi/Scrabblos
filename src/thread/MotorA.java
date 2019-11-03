@@ -1,5 +1,7 @@
 package thread;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -87,7 +89,7 @@ class MotorA {
 				+ "**********************************");
 		// System.out.println("**************************period wp current
 		// "+word_pool.getCurrent_period()+"**********************************");
-		updateBlockChaine();
+		//updateBlockChaine();
 		int cp = letter_pool.getCurrent_period() + 1;
 		letter_pool.setCurrent_period(cp);
 		word_pool.setCurrent_period(cp);
@@ -96,7 +98,7 @@ class MotorA {
 			Entry<String, Boolean> e = it.next();
 			politicians_states.put(e.getKey(), false);
 		}
-		jugement();
+		//jugement();
 
 		lock.unlock();
 	}
@@ -295,9 +297,72 @@ class MotorA {
 		}
 
 	}
+	
+	public static void judge() {
+		lock.lock();
+		ArrayList<Word> currentWords = getLastWord_pool();
+		int maxSize = 0;
+		int maxSizeIndex = 0;
+		if(currentWords.size()>0) {
+			for(Word w : currentWords) {
+				String str = w.getHash();
+				int size = getPreSize(str);
+				size += w.getWord().size();
+				if (size > maxSize) {
+					maxSize = size;
+					maxSizeIndex = currentWords.indexOf(w);
+				}
+			}
+			String winner = currentWords.get(maxSizeIndex).getSignature();
+			System.out.println("maxBlock is "+winner + "maxSize is "+ maxSize);
+			for(int i = MAX_ROUND; i>=0; i--){
+				for (Word w : word_pool.getWords()) {
+					if(w.getSignature()==winner) {
+						System.out.println("politicien "+ w.getPoliticien() + " win "+ w.getWord().size() +" points.");
+						winner = w.getHash();
+						for(Letter l :w.getWord()) {
+							System.out.println("client "+ l.getAuthor() + " wins "+ 1 +" points.");
+						}
+					}
+				}
+			}
+		}
+		
+		lock.unlock();
+	}
 
+	private static int getPreSize(String hash) {
+		lock.lock();
+		MessageDigest digest;
+		try {
+			for (Word w : word_pool.getWords()) {
+				digest = MessageDigest.getInstance("SHA-256");
+				String sighash = w.getSignature();//Utils.bytesToHex(digest.digest((w.getSignature()).getBytes()));
+				if (sighash == hash) {
+					int size = w.getWord().size();
+					if (w.getPeriod() > 0) {
+						hash = w.getHash();
+						//System.out.println("size  = " + size);
+						return size + getPreSize(hash);
+					}
+					if (w.getPeriod() == 0) {
+						//System.out.println("size  = " + size);
+						return size;
+					}
+				}
+			}
+		} catch (NoSuchAlgorithmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		lock.unlock();
+		return 0;
+
+	}
+	
 	public static void jugement() {
 		lock.lock();
+		System.out.println("maxBlock is ");
 		int maxSize = -1;
 		int maxBlock = -1;
 		for (int i = 0; i < blockchaines.size(); i++) {
